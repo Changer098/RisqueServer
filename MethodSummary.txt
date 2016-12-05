@@ -1,0 +1,99 @@
+Method Summary
+	"doesTicketExist" : {
+		"params" : {
+			"id" : int,
+		},
+		"returns" : {
+			"exists" : boolean,
+			//Will be NULL
+			"success" : boolean,
+			"failureReason" : String
+		}
+	},
+	"addTicket" : {
+		"params" : {
+			"id" : int,
+			"actions" : [
+				//Activate, Modify, Repair (Not Supported)
+				"Type" : enum,
+				"picID" : String,
+				"provider" : String
+				"speed" : Speed,
+				"vlan" : int,
+				"voiceVlan" : int,
+				"Services" : [
+					String,
+				]
+			],
+			"DueDate" : {
+				"Month" : int,
+				"Day" : int,
+				"Year" : int,
+				"Hour" : int,
+				//AM or PM (A or P)
+				"Meridiem" : char
+			}
+		},
+		"returns" : {
+			"success" : boolean,
+			"failureReason" : String
+		}
+	},
+	//retrieves all ticket info, including actions
+	"getTicketInfo" : {
+		"params" : {
+			"id" : int
+		},
+		"returns" : {
+			"actions" : [
+				//Activate, Modify, Repair (Not Supported)
+				"Type" : enum,
+				"picID" : String,
+				"provider" : string
+				"speed" : speedType,
+				"vlan" : int,
+				"voiceVlan" : int,
+				"Services" : [
+					String,
+				]
+			],
+			"DueDate" : {
+				"Month" : int,
+				"Day" : int,
+				"Year" : int,
+				"Hour" : int,
+				//AM or PM (A or P)
+				"Meridiem" : char
+			},
+			"success" : boolean,
+			"failureReason" : String
+		}
+	},
+	"checkTicket" : {
+		"params" : {
+			"id" : int,
+			"actions" : [
+				//Activate, Modify, Repair (Not Supported)
+				"Type" : enum,
+				"picID" : String,
+				"provider" : string
+				"speed" : speedType,
+				"vlan" : int,
+				"voiceVlan" : int,
+				"Services" : [
+					String,
+				]
+			]
+		}
+		"returns" : {
+			"foundErrors" : boolean,
+			"errors" : [
+				"picID" : String,
+				"errorMessage" : [
+					String
+				]
+			],
+			"success" : boolean,
+			"failureReason" : String
+		}
+	}
