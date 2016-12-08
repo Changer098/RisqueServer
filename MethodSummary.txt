@@ -13,6 +13,7 @@ Method Summary
 	"addTicket" : {
 		"params" : {
 			"id" : int,
+			"dueBy" : String
 			"actions" : [
 				//Activate, Modify, Repair (Not Supported)
 				"Type" : enum,
@@ -24,15 +25,7 @@ Method Summary
 				"Services" : [
 					String,
 				]
-			],
-			"DueDate" : {
-				"Month" : int,
-				"Day" : int,
-				"Year" : int,
-				"Hour" : int,
-				//AM or PM (A or P)
-				"Meridiem" : char
-			}
+			]
 		},
 		"returns" : {
 			"success" : boolean,

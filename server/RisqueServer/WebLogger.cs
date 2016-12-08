@@ -14,7 +14,15 @@ namespace RisqueServer {
             Console.WriteLine("Called Logger Constructor");
         }
         public void Information(Type type, string format, params object[] args) {
-            Console.WriteLine("Info: " + String.Format(format, args));
+            string formatted;
+            try {
+                formatted = String.Format(format, args);
+            }
+            catch (Exception e) {
+                Console.WriteLine("WebLogger::Information() failed to Format string, printing the format string instead");
+                formatted = format;
+            }
+            Console.WriteLine("Info: " + formatted);
         }
         public void Warning(Type type, string format, params object[] args) {
             Console.WriteLine("Warning: " + String.Format(format, args));
