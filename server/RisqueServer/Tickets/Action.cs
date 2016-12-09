@@ -4,20 +4,12 @@ using System.Linq;
 using System.Text;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using System.Runtime.Serialization;
 
 namespace RisqueServer.Tickets {
     class Action {
-        /*"Type" : enum,
-				"picID" : String,
-				"provider" : string
-				"speed" : speedType,
-				"vlan" : int,
-				"voiceVlan" : int,
-				"Services" : [
-					String,
-				]
-                */
-        public string picID { get; set; }
+        /*public string picID { get; set; }
         public string provider { get; set; }
         [JsonProperty("speed")]
         public string raw_speed {
@@ -29,30 +21,59 @@ namespace RisqueServer.Tickets {
         public ActionType Type { get; set; }
         public int vlan { get; set; }
         public int voiceVlan { get; set; }
-        public string[] Services { get; set; }
+        public string[] Services { get; set; }*/
+
+        public PortInfo portInfo { get; set; }
+        public Settings settings { get; set; }
     }
-    enum ActionType {
+
+    public class PortInfo {
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ActionType actionType { get; set; }
+        public string picID { get; set; }
+        public string provider { get; set; }
+    }
+
+    public class Settings {
+        public string currSpeed { get; set; }
+        public portSpeed ParsedCurrSpeed { get; set; }
+        public List<string> currVlans { get; set; }
+        public string currVoiceVlan { get; set; }
+        public portSpeed ParsedNewSpeed { get; set; }
+        public string newSpeed { get; set; }
+        public string newVlan { get; set; }
+        public string newVoiceVlan { get; set; }
+        public string serializeMessage;
+        [OnDeserialized]
+        internal void OnDeserializedMethod(StreamingContext context) {
+            //parses currSpeed and newSpeed
+            this.ParsedCurrSpeed = portSpeed.ParseString(currSpeed);
+            this.ParsedNewSpeed = portSpeed.ParseString(newSpeed);
+        }
+    }
+
+    public enum ActionType {
         Activate,
         Modify,
         Repair              //Not Supported, identification purposes
     }
-    enum Duplex {
+    public enum Duplex {
         Auto,
         Full,
         Half
     }
 
-    class portSpeed {
+    public class portSpeed {
         
-        Tuple<int, int, int, int> speed { get; set; }           //10/100/100T = 10,100,1000,0 || 100T = 0,100,0,0 (In Megabits)
-        Duplex duplex { get; set; }
+        public Tuple<int, int, int, int> speed { get; set; }           //10/100/100T = 10,100,1000,0 || 100T = 0,100,0,0 (In Megabits)
+        public Duplex duplex { get; set; }
         //TODO: FIX NAME
-        char speedMod { get; set; }                             //Usually the 'T' in 10/100T
+        public char speedMod { get; set; }                             //Usually the 'T' in 10/100T
         //TODO: FIX NAME
-        string midMod { get; set; }                             //The SW in 10/100T-SW-A
+        public string midMod { get; set; }                             //The SW in 10/100T-SW-A
 
         public portSpeed(Duplex duplex,
-            Tuple<int,int,int,int> speed,
+            Tuple<int, int, int, int> speed,
             char speedMod,
             string midMod) {
             this.duplex = duplex;
@@ -60,7 +81,7 @@ namespace RisqueServer.Tickets {
             this.speedMod = speedMod;
             this.midMod = midMod;
         }
-        
+
         /*10/100/1000T-SW-A
         10/100T-SW-A
         1000T-SW-F
@@ -85,7 +106,7 @@ namespace RisqueServer.Tickets {
             }
             //remove the speedMod character for further calculations
             speedMod = split[0][split[0].Length - 1];
-            split[0].TrimEnd(speedMod);
+            split[0] = split[0].Trim(speedMod);
 
             if (split[0].Contains('/')) {
                 //Many different speeds, like 10/100T-SW-A
@@ -103,13 +124,22 @@ namespace RisqueServer.Tickets {
                         numbers[i] = int.Parse(splitStrike[i]);
                     }
                     catch {
-                        throw new Exception("portSpeed.ParseString string is not a valid number");
+                        throw new Exception("portSpeed.ParseString string is not a valid number: " + splitStrike[i]);
                     }
                 }
                 //Frankly this is pretty ugly, but should work
                 for (int i = 0; i < splitStrike.Length - 1; i++) {
-                    if ((numbers[i] > numbers[i+1]) && (numbers[i] > 0) && (numbers[i] % 10 == 0) && (numbers[i] % 5 == 0) && (numbers[i] % 2 == 0)) {
+                    /*if ((numbers[i] > numbers[i+1]) && (numbers[i] > 0) && (numbers[i] % 10 == 0) && (numbers[i] % 5 == 0) && (numbers[i] % 2 == 0)) {
                         throw new Exception("portSpeed.ParseString string is invalid format");
+                    }*/
+                    if ((numbers[i] % 10 != 0) || (numbers[i] % 5 != 0) || (numbers[i] % 2 != 0)) {
+                        throw new Exception("portSpeed.ParseString number is not valid");
+                    }
+                    if (numbers[i] > numbers[i+1]) {
+                        throw new Exception("portSpeed.ParseString number is not valid");
+                    }
+                    if ((numbers[i].ToString()[0] != '1') && (numbers[i].ToString().Length <= 4)) {
+                        throw new Exception("porSpeed.ParseString string is in invalid format");
                     }
                 }
                 if (numbers.Length > 4) {

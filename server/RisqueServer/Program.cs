@@ -23,7 +23,7 @@ namespace RisqueServer {
                 return;
             }
             WebLogger logger = new WebLogger();
-            serviceFactory service = new serviceFactory(logger);
+            ServiceFactory service = new ServiceFactory(logger);
             WebServer server = new WebServer(service, logger);
             server.Listen(p.config.port);
             Console.ReadKey();

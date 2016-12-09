@@ -10,9 +10,9 @@ using System.IO;
 
 
 namespace RisqueServer {
-    class serviceFactory : IServiceFactory {
+    class ServiceFactory : IServiceFactory {
         WebLogger log;
-        public serviceFactory (WebLogger log) {
+        public ServiceFactory (WebLogger log) {
             this.log = log;
         }
         public IService CreateInstance(ConnectionDetails connectionDetails) {
