@@ -7,7 +7,7 @@ using System.IO;
 
 namespace RisqueServer.Tickets {
     class Ticket {
-        int id;
+        /*int id;
         Action[] actions;
         DateTime dueBy;
         string ticketLoc;           //stored info of the ticket - Each scheduled ticket gets its own directory
@@ -17,7 +17,11 @@ namespace RisqueServer.Tickets {
             this.actions = actions;
         }
         public static Ticket parseTicket(string json) {
+            //can parse Action
             return null;
-        }
+        }*/
+        public int ticketID { get; set; }
+        public string dueBy { get; set; }
+        public Action[] Actions { get; set; }
     }
 }

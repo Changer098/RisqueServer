@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using RisqueServer.Tickets;
 
 namespace RisqueServer.Tests {
+    //All Tests passing 1/9/2017
     [TestFixture]
     class TestJSONtoAction {
         [TestCase]
@@ -36,6 +37,30 @@ namespace RisqueServer.Tests {
             Assert.AreEqual(act.portInfo.picID, "FREH-2B9-B");
             Assert.AreEqual(act.portInfo.provider, "freh-g60a-c3750ep-01:01-Gi1/0/42");
             Assert.IsTrue(doEqual(act.settings.ParsedCurrSpeed, portSpeed.ParseString("10/100T-SW-A")));
+            Assert.IsTrue(doEqual(act.settings.ParsedNewSpeed, portSpeed.ParseString("10/100/1000T-SW-A")));
+        }
+        [TestCase]
+        public void parseNoCurrVlans() {
+            string testJSON = @"{
+	                'portInfo':
+	                {
+		                'actionType': 'Activate',
+		                'picID': 'NLSN-B239A-A',
+		                'provider': 'nlsn-b195e-c3750ep-01:01-Gi1/0/39'
+	                },
+	                'settings':
+	                {
+		                'currVlans': [],
+		                'newSpeed': '10/100/1000T-SW-A',
+		                'newVlan': '010.163.019.000/24-NLSN-AGIT-FoodSci_Desktop_Users (1201)',
+		                'newVoiceVlan': '010.011.048.000/23-NLSN-VoIP-B195E_Voice (2975)'
+	                }
+                }";
+            Tickets.Action act = JsonConvert.DeserializeObject<Tickets.Action>(testJSON);
+            Assert.AreEqual(act.portInfo.actionType, Tickets.ActionType.Activate);
+            Assert.AreEqual(act.portInfo.picID, "NLSN-B239A-A");
+            Assert.AreEqual(act.portInfo.provider, "nlsn-b195e-c3750ep-01:01-Gi1/0/39");
+            Assert.IsTrue(doEqual(act.settings.ParsedCurrSpeed, portSpeed.ParseString("")));
             Assert.IsTrue(doEqual(act.settings.ParsedNewSpeed, portSpeed.ParseString("10/100/1000T-SW-A")));
         }
 

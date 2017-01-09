@@ -66,6 +66,7 @@
     <Compile Include="TestSocketHandler.cs" />
     <Compile Include="Tests\TestPortSpeedParsing.cs" />
     <Compile Include="Tests\TestJSONtoAction.cs" />
+    <Compile Include="Tests\TestTicketParsing.cs" />
     <Compile Include="Tickets\Action.cs" />
     <Compile Include="Tickets\Ticket.cs" />
     <Compile Include="Tickets\TicketStorage.cs" />

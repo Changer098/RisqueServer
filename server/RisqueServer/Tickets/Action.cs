@@ -55,12 +55,14 @@ namespace RisqueServer.Tickets {
     public enum ActionType {
         Activate,
         Modify,
-        Repair              //Not Supported, identification purposes
+        Repair,             //Not Supported, identification purposes
+        Unknown             //Needed for parsing an empty speed 
     }
     public enum Duplex {
         Auto,
         Full,
-        Half
+        Half,
+        Unknown
     }
 
     public class portSpeed {
@@ -91,8 +93,11 @@ namespace RisqueServer.Tickets {
         10T-SW-A
         10T-SW-F
         10T-SW-H*/
-        //TODO Unit Test this
+        //TODO Some more unit testing
         public static portSpeed ParseString(string rawString) {
+            if (rawString == null || rawString == "") {
+                return new portSpeed(Duplex.Unknown, new Tuple<int, int, int, int>(0, 0, 0, 0), (char)0, "");
+            }
             string[] split = rawString.Split('-');
             Tuple<int, int, int, int> speed = null;
             string midMod = string.Empty;
