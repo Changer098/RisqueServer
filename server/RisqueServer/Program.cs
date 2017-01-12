@@ -4,10 +4,8 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
-
-using WebSockets.Common;
 using WebSockets;
-using WebSockets.Server;
+using RisqueServer.Communication;
 
 //https://www.codeproject.com/articles/57060/web-socket-server Reference
 
@@ -37,7 +35,7 @@ namespace RisqueServer {
             ParsedConfigFile configFile = null;
             bool markVerbose = false;
             for (int i = 0; i < args.Length; i++) {
-                if (args[i].Equals("-c",StringComparison.CurrentCultureIgnoreCase) ||
+                if (args[i].Equals("-c", StringComparison.CurrentCultureIgnoreCase) ||
                     args[i].Equals("--c", StringComparison.CurrentCultureIgnoreCase)) {
                     //config file
                     string fileName = String.Empty;
@@ -59,14 +57,14 @@ namespace RisqueServer {
                     //verbose output. OVERRIDES CONFIG Settings
                     markVerbose = true;
                 }
-            }
-            if (configFile != null) {
-                prog.config = new ActiveConfig();
-                prog.config.hasConfig = true;
-                prog.config.port = configFile.port;
-                prog.config.portSecure = configFile.portSecure;
-                if (markVerbose) { prog.config.verbose = true; }
-                else { prog.config.verbose = configFile.verbose; }
+                if (configFile != null) {
+                    prog.config = new ActiveConfig();
+                    prog.config.hasConfig = true;
+                    prog.config.port = configFile.port;
+                    prog.config.portSecure = configFile.portSecure;
+                    if (markVerbose) { prog.config.verbose = true; }
+                    else { prog.config.verbose = configFile.verbose; }
+                }
             }
         }
         static void printHelp() {

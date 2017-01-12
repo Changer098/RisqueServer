@@ -1,0 +1,24 @@
+WebSocket Transmission rules
+MANDATORY header: "Content-Type"
+	Two values: json, keep-alive
+	keep-alive has no other lines
+	json has the json text after line 0
+Body: Formatted as JSON-RPC
+	{
+		"method" : string,
+		"params" : {}
+	}
+Errors
+	Errors can only be returned from the Server and are JSON encoded
+	Must use the json Content-Type
+	Has one parameter, ErrorMessage, which describes why the error occurred
+	
+Example Transmissions
+//calling doesTicketExist
+Content-Type: json
+{
+	"method" : "doesTicketExist",
+	"params" : {
+		"id" : 59133
+	}
+}

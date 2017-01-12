@@ -14,7 +14,7 @@ using System.IO;
 using WebSockets.Events;
 using WebSockets.Server;
 
-namespace RisqueServer {
+namespace RisqueServer.Communication {
     public class WebSocketService : WebSocketBase, IService {
         private readonly Stream _stream;
         private readonly string _header;

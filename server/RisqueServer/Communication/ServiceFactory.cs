@@ -9,7 +9,7 @@ using WebSockets.Common;
 using System.IO;
 
 
-namespace RisqueServer {
+namespace RisqueServer.Communication {
     class ServiceFactory : IServiceFactory {
         WebLogger log;
         public ServiceFactory (WebLogger log) {
@@ -18,7 +18,7 @@ namespace RisqueServer {
         public IService CreateInstance(ConnectionDetails connectionDetails) {
             switch (connectionDetails.ConnectionType) {
                 case ConnectionType.WebSocket:
-                    return new TestSocketHandler(connectionDetails.Stream, connectionDetails.TcpClient, connectionDetails.Header, log);
+                    return new SockHandler(connectionDetails.Stream, connectionDetails.TcpClient, connectionDetails.Header, log);
                 case ConnectionType.Http:
                     break;
             }

@@ -6,6 +6,9 @@ using System.Text;
 using System.IO;
 
 namespace RisqueServer.Tickets {
+    /// <summary>
+    /// Describes a Ticket for Deserializing
+    /// </summary>
     class Ticket {
         /*int id;
         Action[] actions;
