@@ -20,6 +20,9 @@ namespace RisqueServer.Communication {
         }
 
         protected override void OnTextFrame(string text) {
+
+            //TODO Fix handling of no json content, currently breaks everything
+
             //string response = "Recieved: " + text;
             /*string response = "Received some shit";
             _logger.Information(this.GetType(),"Recieved " + text);
