@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name        testBtnAdd
 // @namespace   everettr
 // @include     https://risque.itap.purdue.edu/Tickets/Data/TicketDetail.aspx*

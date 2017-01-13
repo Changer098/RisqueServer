@@ -30,8 +30,80 @@ namespace RisqueServer.Communication {
             _logger.Information(this.GetType(), response);*/
             Console.WriteLine("Recieved: " + text);
             base.Send("Hello");
-            bool isError = true;
-            base.Send(ComMessages.UnknownHeaderValue);
+            if (text.AtleastTwoLines()) {
+                //has Content-Type and Content-body
+                int endlineIndex = text.IndexOf('\n');
+                string header = text.Substring(0, endlineIndex);
+                if (header.Contains("Content-Type")) {
+                    string headerValue = header.Split(':')[1].Trim();
+                    if (headerValue.Equals("json", StringComparison.Ordinal)) {
+                        //Actual JSON parsing
+                        string body = text.Substring(endlineIndex + 1, text.Length - endlineIndex - 1);
+                        //TODO FIX URL ENCODING
+                        JObject jobj;
+                        try {
+                            jobj = JObject.Parse(text);
+                            string methodName;
+                            JProperty parameters;
+                            foreach (JProperty prop in jobj.Children()) {
+                                if (prop.Name.Equals("method",StringComparison.Ordinal)) {
+                                    methodName = prop.Value.ToString();
+                                }
+                                else if (prop.Name.Equals("params", StringComparison.Ordinal)) {
+                                    parameters = prop;
+                                }
+                                else {
+                                    string namesy = prop.Name;
+                                }
+                            }
+                        }
+                        catch (Exception e) {
+                            //ERROR
+                            string error = e.Message;
+                            base.Send(ComMessages.ErrorNonParsableJson);
+                        }
+                    }
+                    else if (headerValue.Equals("keep-alive", StringComparison.Ordinal)) {
+                        //keep-alive is improperly formatted, ignore it
+                        base.Send(ComMessages.KeepAlive);
+                    }
+                    else {
+                        //we don't know what we recieved, tell the client it's wrong
+                        base.Send(ComMessages.UnknownContentType);
+                    }
+                }
+                else {
+                    //No Content-Type
+                    base.Send(ComMessages.ErrorNoContentType);
+                }
+            }
+            else {
+                //Probably just a keep-alive
+                string header;
+                if (text.Contains<char>('\n')) {
+                    header = text.Substring(0, text.IndexOf('\n'));
+                }
+                else {
+                    header = text;
+                }
+
+                if (header.Contains("Content-Type")) {
+                    string headerValue = header.Split(':')[1].Trim();
+                    if (headerValue.Equals("keep-alive", StringComparison.Ordinal)) {
+                        base.Send(ComMessages.KeepAlive);
+                    }
+                    else if (headerValue.Equals("json", StringComparison.Ordinal)) {
+                        base.Send(ComMessages.ErrorIncorrectJson);
+                    }
+                    else {
+                        base.Send(ComMessages.UnknownContentType);
+                    }
+                }
+                else {
+                    base.Send(ComMessages.ErrorNoContentType);
+                }
+            }
+
             /*int endlineIndex = text.IndexOf('\n');
             string header = text.Substring(0, endlineIndex);
             bool isJson = false;
@@ -50,23 +122,21 @@ namespace RisqueServer.Communication {
                     isError = true;
                 }
             }*/
-            if (!isError) {
-                //string body = text.Substring(endlineIndex + 1, text.Length - endlineIndex - 1);
-                if (true) {
-                    JObject jobj;
-                    try {
-                        jobj = JObject.Parse(text);
-                    }
-                    catch {
-                        //ERROR
-                    }
+            //string body = text.Substring(endlineIndex + 1, text.Length - endlineIndex - 1);
+            if (true) {
+                JObject jobj;
+                try {
+                    jobj = JObject.Parse(text);
                 }
-                else {
-                    //Assume is keep-alive, return keep-alive
-                    //base.Send("'Content-Type': keep-alive");
+                catch {
+                    //ERROR
                 }
             }
-            
+            else {
+                //Assume is keep-alive, return keep-alive
+                //base.Send("'Content-Type': keep-alive");
+            }
+
         }
     }
 }

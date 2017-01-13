@@ -48,12 +48,13 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="WebSockets">
-      <HintPath>..\..\..\..\Visual Studio 2015\Projects\moreSocketTests\lib\WebSockets.dll</HintPath>
+      <HintPath>..\lib\WebSockets.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Communication\ComMessages.cs" />
     <Compile Include="ConfigFile.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Methods\addTicketInfo.cs" />
     <Compile Include="Methods\checkTicket.cs" />
     <Compile Include="Methods\doesTicketExist.cs" />
