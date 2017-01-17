@@ -15,15 +15,22 @@ Method Summary
 			"dueBy" : String
 			"actions" : [
 				//Activate, Modify, Repair (Not Supported)
-				"Type" : enum,
-				"picID" : String,
-				"provider" : String
-				"speed" : Speed,
-				"vlan" : int,
-				"voiceVlan" : int,
-				"Services" : [
-					String,
-				]
+				"portInfo" : {
+					"actionType" : enum,
+					"picID" : string,
+					"provider" : string
+				},
+				"settings" : {
+					//can be null || not included
+					"currVoiceVlan" : string,
+					//can be null || not included
+					"currVlans" : [string],
+					//can be null || not included
+					"currSpeed" : string,
+					"newVoiceVlan" : string,
+					"newVlan" : string,
+					"newSpeed" : string
+				}
 			]
 		},
 		"returns" : {
@@ -37,26 +44,27 @@ Method Summary
 			"id" : int
 		},
 		"returns" : {
+			"id" : int,
+			"dueBy" : String
 			"actions" : [
 				//Activate, Modify, Repair (Not Supported)
-				"Type" : enum,
-				"picID" : String,
-				"provider" : string
-				"speed" : speedType,
-				"vlan" : int,
-				"voiceVlan" : int,
-				"Services" : [
-					String,
-				]
-			],
-			"DueDate" : {
-				"Month" : int,
-				"Day" : int,
-				"Year" : int,
-				"Hour" : int,
-				//AM or PM (A or P)
-				"Meridiem" : char
-			},
+				"portInfo" : {
+					"actionType" : enum,
+					"picID" : string,
+					"provider" : string
+				},
+				"settings" : {
+					//can be null || not included
+					"currVoiceVlan" : string,
+					//can be null || not included
+					"currVlans" : [string],
+					//can be null || not included
+					"currSpeed" : string,
+					"newVoiceVlan" : string,
+					"newVlan" : string,
+					"newSpeed" : string
+				}
+			]
 			"success" : boolean,
 			"failureReason" : String
 		}
@@ -64,17 +72,25 @@ Method Summary
 	"checkTicket" : {
 		"params" : {
 			"id" : int,
+			"dueBy" : String
 			"actions" : [
 				//Activate, Modify, Repair (Not Supported)
-				"Type" : enum,
-				"picID" : String,
-				"provider" : string
-				"speed" : speedType,
-				"vlan" : int,
-				"voiceVlan" : int,
-				"Services" : [
-					String,
-				]
+				"portInfo" : {
+					"actionType" : enum,
+					"picID" : string,
+					"provider" : string
+				},
+				"settings" : {
+					//can be null || not included
+					"currVoiceVlan" : string,
+					//can be null || not included
+					"currVlans" : [string],
+					//can be null || not included
+					"currSpeed" : string,
+					"newVoiceVlan" : string,
+					"newVlan" : string,
+					"newSpeed" : string
+				}
 			]
 		}
 		"returns" : {

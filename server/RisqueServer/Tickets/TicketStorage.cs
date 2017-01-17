@@ -46,5 +46,17 @@ namespace RisqueServer.Tickets {
             //TODO Implement
             return false;
         }
+        /// <summary>
+        /// Retrieve a stored id
+        /// </summary>
+        /// <param name="id">The id of the ticket being retrieved</param>
+        /// <returns>The requested ticket or null</returns>
+        public Ticket getTicket(int id) {
+            //TODO Implement
+            return null;
+        }
+    }
+    sealed class StoredObject {
+
     }
 }

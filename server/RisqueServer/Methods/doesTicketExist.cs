@@ -23,13 +23,19 @@ namespace RisqueServer.Methods {
                 ticketId = args.Value<int>("id");
             }
             catch {
-                return new JObject(new JProperty("exists", false), new JProperty("success", false), new JProperty("failureReason", Communication.ComMessages.MethodErrorInvalidArguments));
+                return new JObject(new JProperty("exists", false), 
+                    new JProperty("success", false), 
+                    new JProperty("failureReason", "Method contained invalid arguments"));
             }
             if (storage.containsTicket(ticketId)) {
-                return new JObject(new JProperty("exists", true), new JProperty("success", true), new JProperty("failureReason", null));
+                return new JObject(new JProperty("exists", true), 
+                    new JProperty("success", true), 
+                    new JProperty("failureReason", null));
             }
             else {
-                return new JObject(new JProperty("exists", false), new JProperty("success", true), new JProperty("failureReason", null));
+                return new JObject(new JProperty("exists", false), 
+                    new JProperty("success", true), 
+                    new JProperty("failureReason", null));
             }
         }
         public bool usesKeepAlive() {
