@@ -8,21 +8,21 @@ using WebSockets.Server.WebSocket;
 using WebSockets.Common;
 using System.IO;
 using Newtonsoft.Json.Linq;
+using RisqueServer.Methods;
 
 namespace RisqueServer.Communication {
     class SockHandler : WebSocketService {
         private readonly WebLogger _logger;
+        private MethodMan methodMan;
 
-        public SockHandler(Stream stream, TcpClient tcpClient, string header, IWebSocketLogger logger)
+        public SockHandler(Stream stream, TcpClient tcpClient, string header, IWebSocketLogger logger, MethodMan methodMan)
             : base(stream, tcpClient, header, true, logger)
         {
             _logger = (WebLogger)logger;
+            this.methodMan = methodMan;
         }
 
         protected override void OnTextFrame(string text) {
-
-            //TODO Fix handling of no json content, currently breaks everything
-
             //string response = "Recieved: " + text;
             /*string response = "Received some shit";
             _logger.Information(this.GetType(),"Recieved " + text);
@@ -39,21 +39,42 @@ namespace RisqueServer.Communication {
                     if (headerValue.Equals("json", StringComparison.Ordinal)) {
                         //Actual JSON parsing
                         string body = text.Substring(endlineIndex + 1, text.Length - endlineIndex - 1);
-                        //TODO FIX URL ENCODING
                         JObject jobj;
                         try {
-                            jobj = JObject.Parse(text);
-                            string methodName;
-                            JProperty parameters;
+                            jobj = JObject.Parse(body);
+                            string methodName = string.Empty;
+                            JObject parameters = null;
                             foreach (JProperty prop in jobj.Children()) {
                                 if (prop.Name.Equals("method",StringComparison.Ordinal)) {
                                     methodName = prop.Value.ToString();
                                 }
                                 else if (prop.Name.Equals("params", StringComparison.Ordinal)) {
-                                    parameters = prop;
+                                    parameters = (JObject)prop.Value;
                                 }
                                 else {
                                     string namesy = prop.Name;
+                                }
+                            }
+                            if (!methodMan.isValidMethod(methodName)) {
+                                base.Send(ComMessages.ErrorNotValidMethod);
+                            }
+                            else {
+                                //call method
+                                if (methodMan.isAsyncMethod(methodName)) {
+                                    if (!methodMan.CallMethodAsync(methodName, this, parameters)) {
+                                        base.Send(ComMessages.ErrorAsyncMethodFailedToStart);
+                                    }
+                                }
+                                else {
+                                    //call non async method
+                                    string result;
+                                    if (methodMan.callMethod(methodName, out result, parameters)) {
+                                        base.Send(ComMessages.ContentTypeJson + result);
+                                    }
+                                    else {
+                                        //method failed, send failure
+                                        base.Send(ComMessages.ErrorMethodFailed);
+                                    }
                                 }
                             }
                         }

@@ -5,12 +5,13 @@ using System.Text;
 using Newtonsoft.Json.Linq;
 
 namespace RisqueServer.Methods {
+    //TODO - Implement after all other methods are implemented
     class checkTicket : IRPCMethod {
         Scheduler scheduler;
         public checkTicket(Scheduler scheduler) {
 
         }
-        public JProperty[] run(JProperty[] args) {
+        public JObject run(JObject args) {
             return null;
         }
         public bool usesKeepAlive() {

@@ -5,7 +5,6 @@ Method Summary
 		},
 		"returns" : {
 			"exists" : boolean,
-			//Will be NULL
 			"success" : boolean,
 			"failureReason" : String
 		}

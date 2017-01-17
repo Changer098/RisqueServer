@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using RisqueServer.Tickets;
 
 namespace RisqueServer.Methods {
@@ -16,9 +17,18 @@ namespace RisqueServer.Methods {
         /// Store Ticket and add to scheduler
         /// </summary>
         /// <see cref="TicketStorage.storeTicket(Ticket)"/>
-        public JProperty[] run(JProperty[] args) {
+        public JObject run(JObject args) {
             //TODO Implement
             //Utilize TicketStorage.storeTicket
+            try {
+                Ticket ticket = args.ToObject<Ticket>();
+                ticket = ticket;
+                return new JObject(new JProperty("success", true), new JProperty("errorMessage", null));
+            }
+            catch (Exception e) {
+                string message = e.Message;
+            }
+            
             return null;
         }
         public bool usesKeepAlive() {

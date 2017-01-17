@@ -37,5 +37,14 @@ namespace RisqueServer.Tickets {
             System.Diagnostics.Debug.WriteLine("TicketStorage.storeTicket() has not been implemented");
             return false;
         }
+        /// <summary>
+        /// Checks whether or not a ticket exists in the system
+        /// </summary>
+        /// <param name="id">The id of the ticket being searched</param>
+        /// <returns>True if a Ticket exists, False if it doesn't</returns>
+        public bool containsTicket(int id) {
+            //TODO Implement
+            return false;
+        }
     }
 }

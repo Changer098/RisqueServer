@@ -12,13 +12,15 @@ using System.IO;
 namespace RisqueServer.Communication {
     class ServiceFactory : IServiceFactory {
         WebLogger log;
-        public ServiceFactory (WebLogger log) {
+        Methods.MethodMan methodMan;
+        public ServiceFactory (WebLogger log, Methods.MethodMan methodMan) {
             this.log = log;
+            this.methodMan = methodMan;
         }
         public IService CreateInstance(ConnectionDetails connectionDetails) {
             switch (connectionDetails.ConnectionType) {
                 case ConnectionType.WebSocket:
-                    return new SockHandler(connectionDetails.Stream, connectionDetails.TcpClient, connectionDetails.Header, log);
+                    return new SockHandler(connectionDetails.Stream, connectionDetails.TcpClient, connectionDetails.Header, log, methodMan);
                 case ConnectionType.Http:
                     break;
             }

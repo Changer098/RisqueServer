@@ -11,7 +11,7 @@ namespace RisqueServer.Methods {
         public getTicketInfo(TicketStorage storage) {
             this.storage = storage;
         }
-        public JProperty[] run(JProperty[] args) {
+        public JObject run(JObject args) {
             return null;
         }
         public bool usesKeepAlive() {

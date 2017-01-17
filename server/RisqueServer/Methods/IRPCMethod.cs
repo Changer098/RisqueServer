@@ -12,7 +12,7 @@ namespace RisqueServer.Methods {
         /// <param name="args">Method specific arguments, methods are responsible for parsing arguments</param>
         /// <returns>Results of the Method as defined by MethodSummary.txt</returns>
         /// <see cref="MethodSummary.txt"/>
-        JProperty[] run(JProperty[] args);
+        JObject run(JObject args);
 
         /// <summary>
         /// Whether a method uses a keep alive in order to run asynchronously 

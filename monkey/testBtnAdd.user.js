@@ -1,4 +1,4 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name        testBtnAdd
 // @namespace   everettr
 // @include     https://risque.itap.purdue.edu/Tickets/Data/TicketDetail.aspx*
@@ -53,12 +53,12 @@ function createSocket() {
 
 function addTicket(ticketData) {
     var Request = {
-        method: "addTicket",
+        method: "addTicketInfo",
         params: ticketData
     }
     if (_sock != null) {
         //console.log(JSON.stringify(Request));
-        _sock.send(JSON.stringify(Request));
+        _sock.send("Content-Type: json" + '\n' +  JSON.stringify(Request) + '\n');
     }
     else {
         throw "Socket is null!";
@@ -124,6 +124,7 @@ function tryParse() {
             _picID = portInfoElement[0].split(" ")[1].trim().toString();
             var ugly_providersplit = portInfoElement[2].split(":");
             _provider = (ugly_providersplit[1] + ":" + ugly_providersplit[2]).trim().toString();
+            if (_provider === ":undefined") _provider = null;
             console.log("_actionType: " + _actionType + ", _picID: " + _picID + ", _provider: " + _provider);
             /*
               "Current Speed: 

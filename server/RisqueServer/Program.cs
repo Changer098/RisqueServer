@@ -6,6 +6,7 @@ using System.IO;
 using System.Diagnostics;
 using WebSockets;
 using RisqueServer.Communication;
+using RisqueServer.Methods;
 
 //https://www.codeproject.com/articles/57060/web-socket-server Reference
 
@@ -13,6 +14,10 @@ namespace RisqueServer {
     class Program {
 
         ActiveConfig config;
+        MethodMan methodMan;
+        Tickets.TicketStorage ticketStorage;
+        Scheduler scheduler;
+        
         static void Main(string[] args) {
             Program p = new Program();
             parseArgs(p, args);
@@ -21,7 +26,12 @@ namespace RisqueServer {
                 return;
             }
             WebLogger logger = new WebLogger();
-            ServiceFactory service = new ServiceFactory(logger);
+            //TODO Properly initialize
+            p.ticketStorage = new Tickets.TicketStorage();
+            //TODO Properly initalize
+            p.scheduler = new Scheduler();
+            p.methodMan = new MethodMan(p.ticketStorage, p.scheduler);
+            ServiceFactory service = new ServiceFactory(logger, p.methodMan);
             WebServer server = new WebServer(service, logger);
             server.Listen(p.config.port);
             Console.ReadKey();
