@@ -1,0 +1,54 @@
+TicketStorage protocol
+	- Each Ticket gets its own folder by ID name
+	- Each Telecom Room per ticket gets its own folder - Unless it has only one TR
+	- Configuration files are stored for before and after modification, covering my ass
+	- Configuration files are stored in their TR folder, or in the root folder for only one TR
+	- Only stores TICKETS, not other scheduled jobs
+	- Uses a Directory.json to keep track of Tickets in the system
+	Ticket Folder Structure
+		ticket.json
+		status.json
+		Gi#-#-#.config.before
+		Gi#-#-#.config.after
+		
+	ticket.json Structure //Effectively same as RPC params
+		"id" : int,
+		"dueBy" : String
+		"actions" : [
+			//Activate, Modify, Repair (Not Supported)
+			"portInfo" : {
+				"actionType" : enum,
+				"picID" : string,
+				"provider" : string
+			},
+			"settings" : {
+				//can be null || not included
+				"currVoiceVlan" : string,
+				//can be null || not included
+				"currVlans" : [string],
+				//can be null || not included
+				"currSpeed" : string,
+				"newVoiceVlan" : string,
+				"newVlan" : string,
+				"newSpeed" : string
+			}
+		]
+		
+	status.json	//For misc. server details
+		//Allow for custom SSH credientials
+		//Values: "Default" (System stored credientials), Actual user name
+		//CASE SENSITIVE
+		"user" : string,
+		"completed" : boolean
+		//NULL if !completed
+		//Uses Risque Date Encoding
+		"completionDate" : string
+		
+	directory.json //For keeping track of Tickets and
+		//Number of tickets in the system
+		"ticketCount" : int,
+		"tickets" : [
+			"folderLocation" : string,
+			"configLocation" : string
+		]
+		

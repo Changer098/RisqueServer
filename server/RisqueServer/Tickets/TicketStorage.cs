@@ -19,9 +19,10 @@ namespace RisqueServer.Tickets {
         /// Main Constructor
         /// </summary>
         /// <param name="path">Place where the Tickets are currently stored or will be stored</param>
+        /// <remarks>Path must contain a valid directory.json</remarks>
         public TicketStorage(string path) {
             if (Directory.Exists(path)) {
-                //try and load storage.json
+                //try and load directory.json
             }
             else {
                 //create path
@@ -56,7 +57,18 @@ namespace RisqueServer.Tickets {
             return null;
         }
     }
-    sealed class StoredObject {
-
+    /// <summary>
+    /// The ticket field in Directory.json
+    /// </summary>
+    sealed class StoredDetails {
+        public string folderLocation { get; set; }
+        public string configLocation { get; set; }
+    }
+    /// <summary>
+    /// Directory.json
+    /// </summary>
+    class TicketDirectory {
+        public int ticketCount { get; set; }
+        StoredDetails[] tickets { get; set; }
     }
 }
