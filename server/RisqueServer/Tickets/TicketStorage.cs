@@ -3,12 +3,15 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 
 namespace RisqueServer.Tickets {
     /// <summary>
     /// Controls where tickets are stored and where to store tickets
     /// </summary>
-    class TicketStorage {       
+    class TicketStorage {
+        TicketDirectory ticketDirectory = null; 
         /// <summary>
         /// Default Constructor that chains the Main Constructor
         /// </summary>
@@ -23,10 +26,44 @@ namespace RisqueServer.Tickets {
         public TicketStorage(string path) {
             if (Directory.Exists(path)) {
                 //try and load directory.json
+                string fileDirectory = path + @"\directory.json";
+                if (!File.Exists(fileDirectory)) {
+                    Console.WriteLine("Attempted to create TicketStorage with an invalid path");
+                    throw new Exception("Attempted to create TicketStorage with an invalid path");
+                }
+                else {
+                    using (StreamReader reader = new StreamReader(fileDirectory)) {
+                        //this.ticketDirectory = JsonConvert.DeserializeObject<TicketDirectory>(reader.ReadToEnd());
+                        this.ticketDirectory = TicketDirectory.Deserialize(reader.ReadToEnd());
+                    }
+                    //Validate directory
+                    if (!isValidDirectory(this.ticketDirectory)) {
+                        throw new Exception("Loaded an invalid Ticket Directory");
+                    }
+                }
+
             }
             else {
                 //create path
+                DirectoryInfo inf = Directory.CreateDirectory(System.Environment.CurrentDirectory + "\\Tickets");
+
             }
+        }
+        private bool isValidDirectory(TicketDirectory ticketDirectory) {
+            int count = 0;
+            /*foreach (StoredDetails det in ticketDirectory.tickets) {
+                count++;
+                if (!File.Exists(det.configLocation) || !Directory.Exists(det.folderLocation)) {
+                    return false;
+                }
+            }*/
+            //http://stackoverflow.com/a/141098
+            foreach (KeyValuePair<int, StoredDetails> entry in ticketDirectory.tickets) {
+                // do something with entry.Value or entry.Key
+            }
+
+            if (count != ticketDirectory.ticketCount) return false;
+            return true;
         }
         /// <summary>
         /// Stores a ticket and adds it to the scheduler
@@ -63,12 +100,33 @@ namespace RisqueServer.Tickets {
     sealed class StoredDetails {
         public string folderLocation { get; set; }
         public string configLocation { get; set; }
+        public int id { get; set; }
     }
     /// <summary>
     /// Directory.json
     /// </summary>
     class TicketDirectory {
+        public TicketDirectory(int ticketCount) {
+            this.ticketCount = ticketCount;
+            this.tickets = new Dictionary<int, StoredDetails>(ticketCount);
+        }
         public int ticketCount { get; set; }
-        StoredDetails[] tickets { get; set; }
+        public Dictionary<int, StoredDetails> tickets { get; set; }
+        //public StoredDetails[] tickets { get; set; }
+        public static TicketDirectory Deserialize(string text) {
+            JObject jobj;
+            try {
+                jobj = JObject.Parse(text);
+            }
+            catch (Exception e) {
+                Debug.WriteLine("TicketDirectory failed to deserialize with Error: " + e.Message);
+                return null;
+            }
+
+            TicketDirectory direct = new TicketDirectory(jobj.Property("ticketCount").Value.ToObject<int>());
+            foreach (JProperty prop in jobj.Property("tickets").Value) {
+                //Create StoredDetail and add to Dictionary
+            }
+        }
     }
 }

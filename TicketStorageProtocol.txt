@@ -48,6 +48,8 @@ TicketStorage protocol
 		//Number of tickets in the system
 		"ticketCount" : int,
 		"tickets" : [
+			//used as key in Dictionary
+			"id" : int,
 			"folderLocation" : string,
 			"configLocation" : string
 		]
