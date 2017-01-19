@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System.Diagnostics;
 
 namespace RisqueServer.Tickets {
@@ -11,7 +12,9 @@ namespace RisqueServer.Tickets {
     /// Controls where tickets are stored and where to store tickets
     /// </summary>
     class TicketStorage {
-        TicketDirectory ticketDirectory = null; 
+        TicketDirectory ticketDirectory = null;
+        Dictionary<int, Tuple<Ticket, TicketStatus>> tickets = null;
+        string folderRoot = null;
         /// <summary>
         /// Default Constructor that chains the Main Constructor
         /// </summary>
@@ -32,6 +35,10 @@ namespace RisqueServer.Tickets {
                     throw new Exception("Attempted to create TicketStorage with an invalid path");
                 }
                 else {
+                    if (path.Last<char>() != '\\') {
+                        path = path + '\\';
+                    }
+                    this.folderRoot = path;
                     using (StreamReader reader = new StreamReader(fileDirectory)) {
                         //this.ticketDirectory = JsonConvert.DeserializeObject<TicketDirectory>(reader.ReadToEnd());
                         this.ticketDirectory = TicketDirectory.Deserialize(reader.ReadToEnd());
@@ -40,6 +47,7 @@ namespace RisqueServer.Tickets {
                     if (!isValidDirectory(this.ticketDirectory)) {
                         throw new Exception("Loaded an invalid Ticket Directory");
                     }
+                    //Load Tickets from stored json format into a dictionary
                 }
 
             }
@@ -50,20 +58,59 @@ namespace RisqueServer.Tickets {
             }
         }
         private bool isValidDirectory(TicketDirectory ticketDirectory) {
-            int count = 0;
-            /*foreach (StoredDetails det in ticketDirectory.tickets) {
-                count++;
-                if (!File.Exists(det.configLocation) || !Directory.Exists(det.folderLocation)) {
+            int count = 0;  //How many tickets are actually in directory.json versus its ticketCount
+            //Currently not verifying status.json or ticket.json
+            //http://stackoverflow.com/a/141098
+            this.tickets = new Dictionary<int, Tuple<Ticket, TicketStatus>>(ticketDirectory.ticketCount);
+            foreach (KeyValuePair<int, StoredDetails> entry in ticketDirectory.tickets) {
+                if (!File.Exists(getAbsoluteFileLocation(entry.Value.ticketLocation))) {
+                    Console.WriteLine("{0} does not exist", getAbsoluteFileLocation(entry.Value.ticketLocation));
                     return false;
                 }
-            }*/
-            //http://stackoverflow.com/a/141098
-            foreach (KeyValuePair<int, StoredDetails> entry in ticketDirectory.tickets) {
-                // do something with entry.Value or entry.Key
+                if (!Directory.Exists(getAbsoluteFolderLocation(entry.Value.folderLocation))) {
+                    Console.WriteLine("{0} does not exist", getAbsoluteFolderLocation(entry.Value.folderLocation));
+                    return false;
+                }
+                if (!File.Exists(getAbsoluteFileLocation(entry.Value.statusLocation))) {
+                    Console.WriteLine("{0} does not exist", getAbsoluteFileLocation(entry.Value.statusLocation));
+                    return false;
+                }
+                if (!LoadTicket(getAbsoluteFileLocation(entry.Value.ticketLocation), getAbsoluteFileLocation(entry.Value.statusLocation))) {
+                    return false;
+                }
+                count++;
             }
 
-            if (count != ticketDirectory.ticketCount) return false;
+            if (count != ticketDirectory.ticketCount) {
+                Debug.WriteLine("Ticket Count: {0} does not match count supplied by directory.json: {1}", count, ticketDirectory.ticketCount);
+                return false;
+            }
             return true;
+        }
+        private bool LoadTicket(string ticketPath, string statusPath) {
+            try {
+                using (StreamReader ticketReader = new StreamReader(ticketPath)) {
+                    using (StreamReader statusReader = new StreamReader(statusPath)) {
+                        string ticketJson = ticketReader.ReadToEnd();
+                        if (ticketJson == String.Empty) return false;
+                        string statusJson = statusReader.ReadToEnd();
+                        if (statusJson == String.Empty) return false;
+                        Ticket newTicket = JsonConvert.DeserializeObject<Ticket>(ticketJson);
+                        TicketStatus newStatus = JsonConvert.DeserializeObject<TicketStatus>(statusJson);
+                        this.tickets.Add(newTicket.ticketID, new Tuple<Ticket, TicketStatus>(newTicket, newStatus));
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e) {
+                return false;
+            }
+        }
+        private string getAbsoluteFileLocation(string path) {
+            return path.Replace("./", folderRoot);
+        }
+        private string getAbsoluteFolderLocation(string path) {
+            return getAbsoluteFileLocation(path) + '\\';
         }
         /// <summary>
         /// Stores a ticket and adds it to the scheduler
@@ -81,31 +128,46 @@ namespace RisqueServer.Tickets {
         /// <param name="id">The id of the ticket being searched</param>
         /// <returns>True if a Ticket exists, False if it doesn't</returns>
         public bool containsTicket(int id) {
-            //TODO Implement
-            return false;
+            try {
+                Ticket tick = this.tickets[id].Item1;
+                return true;
+            }
+            catch {
+                return false;
+            }
         }
         /// <summary>
         /// Retrieve a stored id
         /// </summary>
         /// <param name="id">The id of the ticket being retrieved</param>
+        /// <param name="success">Whether or not a Ticket was found</param>
         /// <returns>The requested ticket or null</returns>
-        public Ticket getTicket(int id) {
-            //TODO Implement
-            return null;
+        public Ticket getTicket(int id, out bool success) {
+            Ticket tick;
+            try {
+                tick = this.tickets[id].Item1;
+                success = true;
+                return tick;
+            }
+            catch {
+                success = false;
+                return null;
+            }
         }
     }
     /// <summary>
     /// The ticket field in Directory.json
     /// </summary>
-    sealed class StoredDetails {
+    public sealed class StoredDetails {
         public string folderLocation { get; set; }
-        public string configLocation { get; set; }
+        public string ticketLocation { get; set; }
+        public string statusLocation { get; set; }
         public int id { get; set; }
     }
     /// <summary>
     /// Directory.json
     /// </summary>
-    class TicketDirectory {
+    public class TicketDirectory {
         public TicketDirectory(int ticketCount) {
             this.ticketCount = ticketCount;
             this.tickets = new Dictionary<int, StoredDetails>(ticketCount);
@@ -124,9 +186,12 @@ namespace RisqueServer.Tickets {
             }
 
             TicketDirectory direct = new TicketDirectory(jobj.Property("ticketCount").Value.ToObject<int>());
-            foreach (JProperty prop in jobj.Property("tickets").Value) {
+            foreach (JToken token in jobj.Property("tickets").Values()) {
                 //Create StoredDetail and add to Dictionary
+                StoredDetails stored = token.ToObject<StoredDetails>();
+                direct.tickets.Add(stored.id, stored);
             }
+            return direct;
         }
     }
 }

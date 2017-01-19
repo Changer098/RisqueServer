@@ -5,6 +5,7 @@ using System.Text;
 using Newtonsoft.Json.Linq;
 using RisqueServer.Tickets;
 using RisqueServer.Communication;
+using Newtonsoft.Json;
 
 namespace RisqueServer.Methods {
     class getTicketInfo : IRPCMethod {
@@ -17,21 +18,28 @@ namespace RisqueServer.Methods {
                 int ticketId = args.Value<int>("id");
                 if (!storage.containsTicket(ticketId)) {
                     //Does not contain the ticket, send error
-                    return new JObject(null,
-                        new JProperty("success", false),
+                    return new JObject(new JProperty("success", false),
                         new JProperty("failureReason", ComMessages.MethodErrorInvalidArguments));
                 }
                 else {
                     //return retrieved ticket
-                    Ticket ticket = storage.getTicket(ticketId);
-                    return new JObject(ticket,
-                        new JProperty("success", true),
-                        new JProperty("failureReason", null));
+                    bool success;
+                    Ticket ticket = storage.getTicket(ticketId, out success);
+                    if (success) {
+                        JObject obj = JObject.FromObject(ticket);
+                        obj.Add("success", true);
+                        obj.Add("failureReason", null);
+                        return obj;
+                    }
+                    else {
+                        return new JObject(new JProperty("success", false),
+                            new JProperty("failureReason", "Ticket is not in the system"));
+                    }
+                    
                 }
             }
-            catch {
-                return new JObject(null,
-                        new JProperty("success", false),
+            catch (Exception e) {
+                return new JObject(new JProperty("success", false),
                         new JProperty("failureReason", ComMessages.MethodErrorInvalidArguments));
             }
             

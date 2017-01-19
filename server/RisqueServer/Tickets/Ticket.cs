@@ -26,5 +26,13 @@ namespace RisqueServer.Tickets {
         public int ticketID { get; set; }
         public string dueBy { get; set; }
         public Action[] Actions { get; set; }
+        public static Ticket getNull() {
+            Ticket newTicket = new Ticket();
+            newTicket.Actions = new Action[1];
+            newTicket.Actions[0] = new Action();
+            newTicket.dueBy = String.Empty;
+            newTicket.ticketID = -1;
+            return newTicket;
+        }
     }
 }

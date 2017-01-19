@@ -67,13 +67,14 @@
         }
         function getTicketInfo() {
             if (_sock != null && _ticketIdText != null) {
-                var requestObject = { method : "getTicketInfo", params : { id : _ticketIdText.textContent}};
+                console.log("tickedIdText.value: " + _ticketIdText.value);
+                var requestObject = { method : "getTicketInfo", params : { id : _ticketIdText.value}};
                 _sock.send("Content-Type: json" + '\n' + JSON.stringify(requestObject) + '\n');
             }
         }
         function doesTicketExist() {
             if (_sock != null && _ticketIdText != null) {
-                var requestObject = { method: "doesTicketExist", params: { id: _ticketIdText2.textContent } };
+                var requestObject = { method: "doesTicketExist", params: { id: _ticketIdText2.value } };
                 _sock.send("Content-Type: json" + '\n' + JSON.stringify(requestObject) + '\n');
             }
         }

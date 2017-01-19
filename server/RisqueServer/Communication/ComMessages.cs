@@ -41,9 +41,9 @@ namespace RisqueServer.Communication {
             'success' : false,
 	        'failureReason' : 'Method failed to execute'
         }";
-        public static readonly string MethodErrorIsAsync = @"'ErrorMessage' : 'Cannot run Async Method synchronously'";
-        public static readonly string MethodErrorGeneric = @"'ErrorMessage' : 'Method failed to execute'";
-        public static readonly string MethodErrorInvalidArguments = @"'ErrorMessage' : 'Method contained invalid arguments'";
+        public static readonly string MethodErrorIsAsync = @"Cannot run Async Method synchronously";
+        public static readonly string MethodErrorGeneric = @"Method failed to execute";
+        public static readonly string MethodErrorInvalidArguments = @"Method contained invalid arguments";
         public static readonly string ContentTypeJson = @"Content-Type: json" + '\n';
     }
 }

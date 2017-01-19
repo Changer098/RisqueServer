@@ -70,8 +70,10 @@
     <Compile Include="Tests\TestPortSpeedParsing.cs" />
     <Compile Include="Tests\TestJSONtoAction.cs" />
     <Compile Include="Tests\TestTicketParsing.cs" />
+    <Compile Include="Tests\TicketDirectoryTest.cs" />
     <Compile Include="Tickets\Action.cs" />
     <Compile Include="Tickets\Ticket.cs" />
+    <Compile Include="Tickets\TicketStatus.cs" />
     <Compile Include="Tickets\TicketStorage.cs" />
     <Compile Include="Communication\WebLogger.cs" />
     <Compile Include="Communication\WebSocketService.cs" />

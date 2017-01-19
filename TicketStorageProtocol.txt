@@ -50,7 +50,12 @@ TicketStorage protocol
 		"tickets" : [
 			//used as key in Dictionary
 			"id" : int,
+			//relativeLocations are stored only, Only accepts "./" which refers to the root folder 
+			//EX: ./191
 			"folderLocation" : string,
-			"configLocation" : string
+			//EX: ./191/ticket.json
+			"ticketLocation" : string,
+			//Ex: ./191/status.json
+			"statusLocation" : strng
 		]
 		

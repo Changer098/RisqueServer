@@ -86,7 +86,7 @@ namespace RisqueServer.Methods {
                     }
                 }
             }
-            catch {
+            catch (Exception e) {
                 result = Communication.ComMessages.ErrorNotValidMethod;
                 return false;
             }
