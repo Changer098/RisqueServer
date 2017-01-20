@@ -124,40 +124,6 @@ namespace RisqueServer.Communication {
                     base.Send(ComMessages.ErrorNoContentType);
                 }
             }
-
-            /*int endlineIndex = text.IndexOf('\n');
-            string header = text.Substring(0, endlineIndex);
-            bool isJson = false;
-            bool isError = false;
-            if (header.Contains("Content-Type")) {
-                string headerValue = header.Split(':')[1].Trim();
-                if (headerValue.Equals("json",StringComparison.Ordinal)) {
-                    isJson = true;
-                }
-                else if (headerValue.Equals("keep-alive", StringComparison.Ordinal)) {
-                    isJson = false;
-                }
-                else {
-                    //Unknown Content-Type, send error
-                    //base.Send(ComMessages.UnknownHeaderValue);
-                    isError = true;
-                }
-            }*/
-            //string body = text.Substring(endlineIndex + 1, text.Length - endlineIndex - 1);
-            if (true) {
-                JObject jobj;
-                try {
-                    jobj = JObject.Parse(text);
-                }
-                catch {
-                    //ERROR
-                }
-            }
-            else {
-                //Assume is keep-alive, return keep-alive
-                //base.Send("'Content-Type': keep-alive");
-            }
-
         }
     }
 }

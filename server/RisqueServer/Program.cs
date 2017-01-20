@@ -27,7 +27,8 @@ namespace RisqueServer {
             }
             WebLogger logger = new WebLogger();
             //TODO Properly initialize
-            p.ticketStorage = new Tickets.TicketStorage();
+            if (p.config.ticketDirectory != null) p.ticketStorage = new Tickets.TicketStorage(p.config.ticketDirectory);
+            else p.ticketStorage = new Tickets.TicketStorage();
             //TODO Properly initalize
             p.scheduler = new Scheduler();
             p.methodMan = new MethodMan(p.ticketStorage, p.scheduler);
@@ -43,6 +44,7 @@ namespace RisqueServer {
         /// <param name="args"></param>
         static void parseArgs(Program prog, string[] args) {
             ParsedConfigFile configFile = null;
+            string directLocation = null;
             bool markVerbose = false;
             for (int i = 0; i < args.Length; i++) {
                 if (args[i].Equals("-c", StringComparison.CurrentCultureIgnoreCase) ||
@@ -56,6 +58,18 @@ namespace RisqueServer {
                         Debug.WriteLine("Failed to read config File location");
                     }
                     configFile = parseConfig(fileName);
+                }
+                else if (args[i].Equals("-t", StringComparison.CurrentCultureIgnoreCase) ||
+                    args[i].Equals("--t", StringComparison.CurrentCultureIgnoreCase)) {
+                    //config file
+                    string directoryLocation = String.Empty;
+                    try {
+                        directoryLocation = args[++i];   //get the string of the next argument
+                    }
+                    catch (Exception) {
+                        Debug.WriteLine("Failed to read ticket directory location");
+                    }
+                    directLocation = directoryLocation;
                 }
                 else if (args[i].Equals("-h", StringComparison.CurrentCultureIgnoreCase) ||
                     args[i].Equals("--h", StringComparison.CurrentCultureIgnoreCase)) {
@@ -72,6 +86,7 @@ namespace RisqueServer {
                     prog.config.hasConfig = true;
                     prog.config.port = configFile.port;
                     prog.config.portSecure = configFile.portSecure;
+                    prog.config.ticketDirectory = directLocation;
                     if (markVerbose) { prog.config.verbose = true; }
                     else { prog.config.verbose = configFile.verbose; }
                 }

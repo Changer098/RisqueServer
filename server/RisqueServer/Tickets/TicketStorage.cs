@@ -27,17 +27,30 @@ namespace RisqueServer.Tickets {
         /// <param name="path">Place where the Tickets are currently stored or will be stored</param>
         /// <remarks>Path must contain a valid directory.json</remarks>
         public TicketStorage(string path) {
+            bool isRightSlash = false;
+            if (path.Contains('\\')) {
+                isRightSlash = false;
+                if (path.Last<char>() != '\\') {
+                    path = path + '\\';
+                }
+            }
+            else if (path.Contains('/')) {
+                isRightSlash = true;
+                if (path.Last<char>() != '/') {
+                    path = path + '/';
+                }
+            }
+
             if (Directory.Exists(path)) {
                 //try and load directory.json
-                string fileDirectory = path + @"\directory.json";
+                string fileDirectory; 
+                if (isRightSlash) fileDirectory = path + @"directory.json";
+                else fileDirectory = path + @"directory.json";
                 if (!File.Exists(fileDirectory)) {
                     Console.WriteLine("Attempted to create TicketStorage with an invalid path");
                     throw new Exception("Attempted to create TicketStorage with an invalid path");
                 }
                 else {
-                    if (path.Last<char>() != '\\') {
-                        path = path + '\\';
-                    }
                     this.folderRoot = path;
                     using (StreamReader reader = new StreamReader(fileDirectory)) {
                         //this.ticketDirectory = JsonConvert.DeserializeObject<TicketDirectory>(reader.ReadToEnd());
@@ -53,8 +66,15 @@ namespace RisqueServer.Tickets {
             }
             else {
                 //create path
+                this.folderRoot = path;
                 DirectoryInfo inf = Directory.CreateDirectory(System.Environment.CurrentDirectory + "\\Tickets");
-
+                //create directory.json
+                TicketDirectory directory = new TicketDirectory(0);
+                string jsonData = JsonConvert.SerializeObject(directory);
+                string directoryPath = path + @"\directory.json";
+                using (StreamWriter writer = File.CreateText(directoryPath)) {
+                    writer.Write(jsonData);
+                }
             }
         }
         private bool isValidDirectory(TicketDirectory ticketDirectory) {
@@ -154,6 +174,19 @@ namespace RisqueServer.Tickets {
                 return null;
             }
         }
+
+        //TODO Implement
+        private async void updateDirectoryFile() {
+            //updates the directory file with the new values
+        }
+        //TODO Implement
+        private async void updateStatusFile(int ticketId) {
+            //updates the given status file for a ticket
+        }
+        //TODO Implement
+        private async void writeTicketFile(Ticket ticket, string path) {
+            //writes ticket to path
+        }
     }
     /// <summary>
     /// The ticket field in Directory.json
@@ -182,7 +215,7 @@ namespace RisqueServer.Tickets {
             }
             catch (Exception e) {
                 Debug.WriteLine("TicketDirectory failed to deserialize with Error: " + e.Message);
-                return null;
+                throw new Exception("Could not deserialize TicketDirectory");
             }
 
             TicketDirectory direct = new TicketDirectory(jobj.Property("ticketCount").Value.ToObject<int>());

@@ -36,14 +36,15 @@ namespace RisqueServer.Tickets {
 
     public class Settings {
         public string currSpeed { get; set; }
+        [JsonIgnore]
         public portSpeed ParsedCurrSpeed { get; set; }
         public List<string> currVlans { get; set; }
         public string currVoiceVlan { get; set; }
+        [JsonIgnore]
         public portSpeed ParsedNewSpeed { get; set; }
         public string newSpeed { get; set; }
         public string newVlan { get; set; }
         public string newVoiceVlan { get; set; }
-        public string serializeMessage;
         [OnDeserialized]
         internal void OnDeserializedMethod(StreamingContext context) {
             //parses currSpeed and newSpeed

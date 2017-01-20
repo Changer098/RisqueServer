@@ -1,0 +1,12 @@
+{
+    "ticketCount": 1,
+    "tickets":
+    [
+        {
+            "id": 59211,
+            "folderLocation": "./",
+            "ticketLocation": "./ticket.json",
+            "statusLocation": "./status.json"
+        }
+    ]
+}
