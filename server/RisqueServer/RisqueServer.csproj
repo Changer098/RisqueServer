@@ -69,6 +69,7 @@
     <Compile Include="Tests\TestHeaderSeperation.cs" />
     <Compile Include="Tests\TestPortSpeedParsing.cs" />
     <Compile Include="Tests\TestJSONtoAction.cs" />
+    <Compile Include="Tests\TestRisqueDateDecoding.cs" />
     <Compile Include="Tests\TestTicketParsing.cs" />
     <Compile Include="Tests\TicketDirectoryTest.cs" />
     <Compile Include="Tickets\Action.cs" />

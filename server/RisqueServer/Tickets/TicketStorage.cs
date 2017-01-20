@@ -176,15 +176,19 @@ namespace RisqueServer.Tickets {
         }
 
         //TODO Implement
-        private async void updateDirectoryFile() {
+        //Make async
+        private void updateDirectoryFile() {
             //updates the directory file with the new values
+            
         }
         //TODO Implement
-        private async void updateStatusFile(int ticketId) {
+        //Make async
+        private void updateStatusFile(int ticketId) {
             //updates the given status file for a ticket
         }
         //TODO Implement
-        private async void writeTicketFile(Ticket ticket, string path) {
+        //Make async
+        private void writeTicketFile(Ticket ticket, string path) {
             //writes ticket to path
         }
     }
