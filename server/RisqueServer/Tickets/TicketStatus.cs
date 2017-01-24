@@ -5,6 +5,17 @@ using System.Text;
 
 namespace RisqueServer.Tickets {
     public class TicketStatus {
+        //Default Constructor
+        public TicketStatus() {
+            this.user = "Default";
+            this.completed = false;
+            this.completionDate = null;
+        }
+        //Supplied user name
+        public TicketStatus(string user) : base() {
+            this.user = user;
+            //TODO check if valid user
+        }
         //Allow for custom SSH credientials
         //Values: "Default" (System stored credientials), Actual user name
         //CASE SENSITIVE

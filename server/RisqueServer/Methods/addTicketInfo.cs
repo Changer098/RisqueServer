@@ -22,9 +22,12 @@ namespace RisqueServer.Methods {
             //Utilize TicketStorage.storeTicket
             try {
                 Ticket ticket = args.ToObject<Ticket>();
-                ticket = ticket;
-                return new JObject(new JProperty("success", true), 
-                    new JProperty("errorMessage", null));
+                if (storage.storeTicket(ticket)) {
+                    return new JObject(new JProperty("success", true), new JProperty("failureReason", null));
+                }
+                else {
+                    return new JObject(new JProperty("success", false), new JProperty("failureReason", "Dunno"));
+                }
             }
             catch (Exception e) {
                 string message = e.Message;

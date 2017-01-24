@@ -18,7 +18,7 @@ namespace RisqueServer.Tickets {
         Dictionary<int, Tuple<Ticket, TicketStatus>> tickets = null;
         string folderRoot = null;
         Thread WorkerThread;
-        int workerRefreshMinutes = 5;         //How often should IOWorker check for updates
+        int workerRefreshMinutes = 1;         //How often should IOWorker check for updates
         bool addedTicket;
         /// <summary>
         /// Default Constructor that chains the Main Constructor
@@ -145,8 +145,36 @@ namespace RisqueServer.Tickets {
         public bool storeTicket(Ticket ticket) {
             //TODO Implement
             //Set addedTicket = true
-            System.Diagnostics.Debug.WriteLine("TicketStorage.storeTicket() has not been implemented");
-            return false;
+            //create folder with given ticketId as name
+            if (Directory.Exists(folderRoot + ticket.ticketID)) {
+                return false;
+            }
+            else {
+                try {
+                    string fullPath = Directory.CreateDirectory(folderRoot + ticket.ticketID).FullName + '\\';
+                    fullPath = fullPath;
+                    File.WriteAllText(fullPath + "ticket.json", JsonConvert.SerializeObject(ticket));
+                    ticketDirectory.ticketCount = ticketDirectory.ticketCount + 1;
+                    string relativeFolder = "./" + ticket.ticketID + '/';
+                    relativeFolder = relativeFolder;
+                    StoredDetails detail = new StoredDetails("./" + ticket.ticketID,
+                        relativeFolder + "ticket.json",
+                        relativeFolder + "status.json",
+                        ticket.ticketID);
+                    detail = detail;
+                    TicketStatus status = new TicketStatus();
+                    ticketDirectory.tickets.Add(ticket.ticketID, detail);
+                    tickets.Add(ticket.ticketID, new Tuple<Ticket, TicketStatus>(ticket, status));
+                    updateStatusFile(ticket.ticketID, false);
+                    Console.WriteLine("SCHEDULER STILL HAS TO BE IMPLEMENTED");
+                    addedTicket = true;
+                    return true;
+                }
+                catch {
+                    return false;
+                }
+            }
+            //System.Diagnostics.Debug.WriteLine("TicketStorage.storeTicket() has not been implemented");
         }
         /// <summary>
         /// Checks whether or not a ticket exists in the system
@@ -193,6 +221,7 @@ namespace RisqueServer.Tickets {
                     if (addedTicket)
                     {
                         updateDirectoryFile();
+                        Console.WriteLine("Updated");
                     }
                 }
                 catch (ThreadInterruptedException e)
@@ -205,11 +234,26 @@ namespace RisqueServer.Tickets {
             //TODO Implement BackgroundWorker closing
         }
 
-        //TODO Implement
         //Make async
         private void updateDirectoryFile() {
             //updates the directory file with the new values
-            
+            string filePath = folderRoot + "directory.json";
+            if (!File.Exists(filePath)) {
+                //FBackups are when things go badly, not normal backups
+                Debug.WriteLine("Directory file doesn't exist, backing up our current settings.");
+                if (File.Exists(folderRoot + "directory.Fbackup.json")) {
+                    File.Copy(folderRoot + "directory.Fbackup.json", folderRoot + "directory.Fbackup.json.old");
+                    File.Delete(folderRoot + "directory.Fbackup.json");
+                }
+                File.WriteAllText(folderRoot + "directory.Fbackup.json", JsonConvert.SerializeObject(ticketDirectory));
+                throw new Exception("Can't update directory file, doesn't exist");
+                //Maybe backup the current directory to file?
+            }
+            else {
+                File.Copy(folderRoot + "directory.json", folderRoot + "directory.json.backup");
+                File.Delete(folderRoot + "directory.json");
+                File.WriteAllText(folderRoot + "directory.json", JsonConvert.SerializeObject(ticketDirectory));
+            }
         }
         //Run async
         private void updateStatusFile(int ticketId, bool completed) {
@@ -223,6 +267,7 @@ namespace RisqueServer.Tickets {
                 }
                 if (ticketDirectory.tickets.ContainsKey(ticketId)) {
                     string statusLocation = ticketDirectory.tickets[ticketId].statusLocation;
+                    statusLocation = getAbsoluteFileLocation(statusLocation);
                     File.WriteAllText(statusLocation, JsonConvert.SerializeObject(status));
                 }
                 else {
@@ -258,6 +303,13 @@ namespace RisqueServer.Tickets {
     /// The ticket field in Directory.json
     /// </summary>
     public sealed class StoredDetails {
+        public StoredDetails() { }
+        public StoredDetails(string folderLocation, string ticketLocation, string statusLocation, int id) {
+            this.folderLocation = folderLocation;
+            this.ticketLocation = ticketLocation;
+            this.statusLocation = statusLocation;
+            this.id = id;
+        }
         public string folderLocation { get; set; }
         public string ticketLocation { get; set; }
         public string statusLocation { get; set; }
