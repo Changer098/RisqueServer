@@ -6,6 +6,8 @@ using System.Text;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace RisqueServer.Tickets {
     /// <summary>
@@ -15,6 +17,9 @@ namespace RisqueServer.Tickets {
         TicketDirectory ticketDirectory = null;
         Dictionary<int, Tuple<Ticket, TicketStatus>> tickets = null;
         string folderRoot = null;
+        Thread WorkerThread;
+        int workerRefreshMinutes = 5;         //How often should IOWorker check for updates
+        bool addedTicket;
         /// <summary>
         /// Default Constructor that chains the Main Constructor
         /// </summary>
@@ -139,6 +144,7 @@ namespace RisqueServer.Tickets {
         /// <returns>Whether the ticket was successfully stored</returns>
         public bool storeTicket(Ticket ticket) {
             //TODO Implement
+            //Set addedTicket = true
             System.Diagnostics.Debug.WriteLine("TicketStorage.storeTicket() has not been implemented");
             return false;
         }
@@ -227,6 +233,13 @@ namespace RisqueServer.Tickets {
                 throw new Exception("Ticket hasn't been stored yet, can't update Status file for it");
             }
         }
+
+        //Callable method for completing tickets
+        public void completeTicket(int tickedId) {
+            Console.WriteLine("Completed: " + tickedId);
+            updateStatusFile(tickedId, true);
+        }
+
         //Run async
         private void writeTicketFile(Ticket ticket, string path) {
             //writes ticket to path
