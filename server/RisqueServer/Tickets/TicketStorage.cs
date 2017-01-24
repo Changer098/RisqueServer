@@ -6,6 +6,8 @@ using System.Text;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace RisqueServer.Tickets {
     /// <summary>
@@ -15,6 +17,9 @@ namespace RisqueServer.Tickets {
         TicketDirectory ticketDirectory = null;
         Dictionary<int, Tuple<Ticket, TicketStatus>> tickets = null;
         string folderRoot = null;
+        Thread WorkerThread;
+        int workerRefreshMinutes = 5;         //How often should IOWorker check for updates
+        bool addedTicket;
         /// <summary>
         /// Default Constructor that chains the Main Constructor
         /// </summary>
@@ -76,6 +81,9 @@ namespace RisqueServer.Tickets {
                     writer.Write(jsonData);
                 }
             }
+            //Create BackgroundWorker
+            this.WorkerThread = new Thread(() => IOWorker());
+            this.WorkerThread.Start();
         }
         private bool isValidDirectory(TicketDirectory ticketDirectory) {
             int count = 0;  //How many tickets are actually in directory.json versus its ticketCount
@@ -139,8 +147,34 @@ namespace RisqueServer.Tickets {
         /// <returns>Whether the ticket was successfully stored</returns>
         public bool storeTicket(Ticket ticket) {
             //TODO Implement
+            //Set addedTicket = true
             System.Diagnostics.Debug.WriteLine("TicketStorage.storeTicket() has not been implemented");
             return false;
+        }
+
+        /// <summary>
+        /// Background Worker for maintaining updates to files
+        /// </summary>
+        protected void IOWorker()
+        {
+            TimeSpan sleepTime = new TimeSpan(0, workerRefreshMinutes, 0);
+            while(true)
+            {
+                try {
+                    Thread.Sleep(sleepTime);
+                    if (addedTicket)
+                    {
+                        updateDirectoryFile();
+                    }
+                }
+                catch (ThreadInterruptedException e)
+                {
+                    Console.WriteLine("TicketStorage thread was interrupted, killing");
+                    break;
+                }
+            }
+            //Thread is closing, do something
+            //TODO Implement BackgroundWorker closing
         }
         /// <summary>
         /// Checks whether or not a ticket exists in the system
@@ -176,20 +210,51 @@ namespace RisqueServer.Tickets {
         }
 
         //TODO Implement
-        //Make async
+        //Run async
         private void updateDirectoryFile() {
             //updates the directory file with the new values
             
         }
-        //TODO Implement
-        //Make async
-        private void updateStatusFile(int ticketId) {
+        //Run async
+        private void updateStatusFile(int ticketId, bool completed) {
             //updates the given status file for a ticket
+            //assumes the ticket has already been verified and stored in tickets[]
+            if (tickets.ContainsKey(ticketId)) {
+                TicketStatus status = tickets[ticketId].Item2;
+                if (completed) {
+                    status.completed = true;
+                    status.completionDate = DateTime.Now.toRisqueTime();
+                }
+                if (ticketDirectory.tickets.ContainsKey(ticketId)) {
+                    string statusLocation = ticketDirectory.tickets[ticketId].statusLocation;
+                    File.WriteAllText(statusLocation, JsonConvert.SerializeObject(status));
+                }
+                else {
+                    throw new Exception("Ticket has been stored, but not in the ticketDirectory");
+                }
+            }
+            else {
+                throw new Exception("Ticket hasn't been stored yet, can't update Status file for it");
+            }
         }
-        //TODO Implement
-        //Make async
-        private void writeTicketFile(Ticket ticket, string path) {
+        //Run async
+        public static void writeTicketFile(Ticket ticket, string path) {
             //writes ticket to path
+            if (File.Exists(path)) {
+                //either updating or the file is occupied for some reason, move and copy it
+                string newPath = path + ".old";
+                //string DataToCopy = File.ReadAllText(path);
+                //File.WriteAllText(newPath, DataToCopy);
+                File.Copy(path, newPath, true);
+                File.Delete(path);
+            }
+            File.WriteAllText(path, JsonConvert.SerializeObject(ticket));
+        }
+
+        //Callable method for completing tickets
+        public void completeTicket(int tickedId) {
+            Console.WriteLine("Completed: " + tickedId);
+            updateStatusFile(tickedId, true);
         }
     }
     /// <summary>
