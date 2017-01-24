@@ -31,7 +31,6 @@ namespace RisqueServer.Tests {
             Assert.IsTrue(subShouldBe == parseString(submitted), "moreDates() failed submitted");
         }
 
-        //Now located in Extensions.ParseRisqueTime()
         public DateTime parseString(string text) {
             text = text.Trim();
             string toParse;

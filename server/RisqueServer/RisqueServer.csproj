@@ -71,7 +71,6 @@
     <Compile Include="Tests\TestJSONtoAction.cs" />
     <Compile Include="Tests\TestRisqueDateDecoding.cs" />
     <Compile Include="Tests\TestTicketParsing.cs" />
-    <Compile Include="Tests\TestWriteTicket.cs" />
     <Compile Include="Tests\TicketDirectoryTest.cs" />
     <Compile Include="Tickets\Action.cs" />
     <Compile Include="Tickets\Ticket.cs" />

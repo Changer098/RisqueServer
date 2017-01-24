@@ -6,8 +6,6 @@ using System.Text;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace RisqueServer.Tickets {
     /// <summary>
@@ -17,9 +15,6 @@ namespace RisqueServer.Tickets {
         TicketDirectory ticketDirectory = null;
         Dictionary<int, Tuple<Ticket, TicketStatus>> tickets = null;
         string folderRoot = null;
-        Thread WorkerThread;
-        int workerRefreshMinutes = 5;         //How often should IOWorker check for updates
-        bool addedTicket;
         /// <summary>
         /// Default Constructor that chains the Main Constructor
         /// </summary>
@@ -81,9 +76,6 @@ namespace RisqueServer.Tickets {
                     writer.Write(jsonData);
                 }
             }
-            //Create BackgroundWorker
-            this.WorkerThread = new Thread(() => IOWorker());
-            this.WorkerThread.Start();
         }
         private bool isValidDirectory(TicketDirectory ticketDirectory) {
             int count = 0;  //How many tickets are actually in directory.json versus its ticketCount
@@ -147,34 +139,8 @@ namespace RisqueServer.Tickets {
         /// <returns>Whether the ticket was successfully stored</returns>
         public bool storeTicket(Ticket ticket) {
             //TODO Implement
-            //Set addedTicket = true
             System.Diagnostics.Debug.WriteLine("TicketStorage.storeTicket() has not been implemented");
             return false;
-        }
-
-        /// <summary>
-        /// Background Worker for maintaining updates to files
-        /// </summary>
-        protected void IOWorker()
-        {
-            TimeSpan sleepTime = new TimeSpan(0, workerRefreshMinutes, 0);
-            while(true)
-            {
-                try {
-                    Thread.Sleep(sleepTime);
-                    if (addedTicket)
-                    {
-                        updateDirectoryFile();
-                    }
-                }
-                catch (ThreadInterruptedException e)
-                {
-                    Console.WriteLine("TicketStorage thread was interrupted, killing");
-                    break;
-                }
-            }
-            //Thread is closing, do something
-            //TODO Implement BackgroundWorker closing
         }
         /// <summary>
         /// Checks whether or not a ticket exists in the system
@@ -208,9 +174,33 @@ namespace RisqueServer.Tickets {
                 return null;
             }
         }
+		/// <summary>
+        /// Background Worker for maintaining updates to files
+        /// </summary>
+        protected void IOWorker()
+        {
+            TimeSpan sleepTime = new TimeSpan(0, workerRefreshMinutes, 0);
+            while(true)
+            {
+                try {
+                    Thread.Sleep(sleepTime);
+                    if (addedTicket)
+                    {
+                        updateDirectoryFile();
+                    }
+                }
+                catch (ThreadInterruptedException e)
+                {
+                    Console.WriteLine("TicketStorage thread was interrupted, killing");
+                    break;
+                }
+            }
+            //Thread is closing, do something
+            //TODO Implement BackgroundWorker closing
+        }
 
         //TODO Implement
-        //Run async
+        //Make async
         private void updateDirectoryFile() {
             //updates the directory file with the new values
             
@@ -249,12 +239,6 @@ namespace RisqueServer.Tickets {
                 File.Delete(path);
             }
             File.WriteAllText(path, JsonConvert.SerializeObject(ticket));
-        }
-
-        //Callable method for completing tickets
-        public void completeTicket(int tickedId) {
-            Console.WriteLine("Completed: " + tickedId);
-            updateStatusFile(tickedId, true);
         }
     }
     /// <summary>
