@@ -238,7 +238,7 @@ namespace RisqueServer.Tickets {
             }
         }
         //Run async
-        public static void writeTicketFile(Ticket ticket, string path) {
+        private void writeTicketFile(Ticket ticket, string path) {
             //writes ticket to path
             if (File.Exists(path)) {
                 //either updating or the file is occupied for some reason, move and copy it
