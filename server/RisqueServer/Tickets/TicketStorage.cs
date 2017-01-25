@@ -253,14 +253,16 @@ namespace RisqueServer.Tickets {
                     File.Copy(folderRoot + "directory.Fbackup.json", folderRoot + "directory.Fbackup.json.old");
                     File.Delete(folderRoot + "directory.Fbackup.json");
                 }
-                File.WriteAllText(folderRoot + "directory.Fbackup.json", JsonConvert.SerializeObject(ticketDirectory));
+                //File.WriteAllText(folderRoot + "directory.Fbackup.json", JsonConvert.SerializeObject(ticketDirectory));
+                File.WriteAllText(folderRoot + "directory.Fbackup.json", TicketDirectory.Serialize(this.ticketDirectory));
                 throw new Exception("Can't update directory file, doesn't exist");
                 //Maybe backup the current directory to file?
             }
             else {
                 File.Copy(folderRoot + "directory.json", folderRoot + "directory.json.backup");
                 File.Delete(folderRoot + "directory.json");
-                File.WriteAllText(folderRoot + "directory.json", JsonConvert.SerializeObject(ticketDirectory));
+                //File.WriteAllText(folderRoot + "directory.json", JsonConvert.SerializeObject(ticketDirectory));
+                File.WriteAllText(folderRoot + "directory.json", TicketDirectory.Serialize(this.ticketDirectory));
             }
         }
         //Run async
@@ -352,6 +354,24 @@ namespace RisqueServer.Tickets {
                 direct.tickets.Add(stored.id, stored);
             }
             return direct;
+        }
+        public static string Serialize(TicketDirectory tick) {
+            JObject obj = new JObject(new JProperty("ticketCount", tick.ticketCount));
+            JArray arr = new JArray();
+            foreach (KeyValuePair<int, StoredDetails> entry in tick.tickets) {
+                try {
+                    JObject entryObj = new JObject(new JProperty("id", entry.Value.id),
+                        new JProperty("folderLocation", entry.Value.folderLocation),
+                        new JProperty("statusLocation", entry.Value.statusLocation),
+                        new JProperty("ticketLocation", entry.Value.ticketLocation));
+                    arr.Add(entryObj);
+                }
+                catch (Exception e) {
+                    string message = e.Message;
+                }
+            }
+            obj.Add(arr);
+            return obj.ToString();
         }
     }
 }
