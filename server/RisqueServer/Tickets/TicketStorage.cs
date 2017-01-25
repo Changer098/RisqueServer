@@ -81,6 +81,8 @@ namespace RisqueServer.Tickets {
                     writer.Write(jsonData);
                 }
             }
+            WorkerThread = new Thread(() => IOWorker());
+            WorkerThread.Start();
         }
         private bool isValidDirectory(TicketDirectory ticketDirectory) {
             int count = 0;  //How many tickets are actually in directory.json versus its ticketCount
@@ -141,36 +143,40 @@ namespace RisqueServer.Tickets {
         /// Stores a ticket and adds it to the scheduler
         /// </summary>
         /// <param name="ticket">The ticket to be stored</param>
+        /// <param name="failureReason">Reason why the method failed</param>
         /// <returns>Whether the ticket was successfully stored</returns>
-        public bool storeTicket(Ticket ticket) {
+        public bool storeTicket(Ticket ticket, out string failureReason) {
             //TODO Implement
             //Set addedTicket = true
             //create folder with given ticketId as name
             if (Directory.Exists(folderRoot + ticket.ticketID)) {
+                failureReason = "Ticket directory already exists, maybe the ticket exists?";
                 return false;
             }
             else {
                 try {
                     string fullPath = Directory.CreateDirectory(folderRoot + ticket.ticketID).FullName + '\\';
-                    fullPath = fullPath;
+                    //fullPath = fullPath;
                     File.WriteAllText(fullPath + "ticket.json", JsonConvert.SerializeObject(ticket));
                     ticketDirectory.ticketCount = ticketDirectory.ticketCount + 1;
                     string relativeFolder = "./" + ticket.ticketID + '/';
-                    relativeFolder = relativeFolder;
+                    //relativeFolder = relativeFolder;
                     StoredDetails detail = new StoredDetails("./" + ticket.ticketID,
                         relativeFolder + "ticket.json",
                         relativeFolder + "status.json",
                         ticket.ticketID);
-                    detail = detail;
+                    //detail = detail;
                     TicketStatus status = new TicketStatus();
                     ticketDirectory.tickets.Add(ticket.ticketID, detail);
                     tickets.Add(ticket.ticketID, new Tuple<Ticket, TicketStatus>(ticket, status));
                     updateStatusFile(ticket.ticketID, false);
                     Console.WriteLine("SCHEDULER STILL HAS TO BE IMPLEMENTED");
                     addedTicket = true;
+                    failureReason = null;
                     return true;
                 }
-                catch {
+                catch (Exception e) {
+                    failureReason = e.Message;
                     return false;
                 }
             }
@@ -217,12 +223,14 @@ namespace RisqueServer.Tickets {
             while(true)
             {
                 try {
-                    Thread.Sleep(sleepTime);
+                    
                     if (addedTicket)
                     {
                         updateDirectoryFile();
                         Console.WriteLine("Updated");
                     }
+                    Debug.WriteLine("Sleeping for {0} minutes", sleepTime.Minutes);
+                    Thread.Sleep(sleepTime);
                 }
                 catch (ThreadInterruptedException e)
                 {
@@ -339,6 +347,7 @@ namespace RisqueServer.Tickets {
             TicketDirectory direct = new TicketDirectory(jobj.Property("ticketCount").Value.ToObject<int>());
             foreach (JToken token in jobj.Property("tickets").Values()) {
                 //Create StoredDetail and add to Dictionary
+                //broken
                 StoredDetails stored = token.ToObject<StoredDetails>();
                 direct.tickets.Add(stored.id, stored);
             }
