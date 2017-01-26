@@ -259,7 +259,7 @@ namespace RisqueServer.Tickets {
                 //Maybe backup the current directory to file?
             }
             else {
-                File.Copy(folderRoot + "directory.json", folderRoot + "directory.json.backup");
+                File.Copy(folderRoot + "directory.json", folderRoot + "directory.json.backup", true);
                 File.Delete(folderRoot + "directory.json");
                 //File.WriteAllText(folderRoot + "directory.json", JsonConvert.SerializeObject(ticketDirectory));
                 File.WriteAllText(folderRoot + "directory.json", TicketDirectory.Serialize(this.ticketDirectory));
@@ -370,7 +370,7 @@ namespace RisqueServer.Tickets {
                     string message = e.Message;
                 }
             }
-            obj.Add(arr);
+            obj.Add(new JProperty("tickets", arr));
             return obj.ToString();
         }
     }
