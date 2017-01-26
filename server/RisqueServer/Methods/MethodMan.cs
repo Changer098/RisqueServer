@@ -11,8 +11,8 @@ namespace RisqueServer.Methods {
     /// Method Manager, allows calling methods
     /// </summary>
     class MethodMan {
-        private TicketStorage storage { get; }
-        private Scheduler scheduler { get; }
+        private TicketStorage storage;
+        private Scheduler scheduler;
         private Dictionary<string, IRPCMethod> methodDictionary;
 
         public static MethodMan getActiveManager { get; private set; }

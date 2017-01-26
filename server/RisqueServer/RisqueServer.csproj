@@ -63,9 +63,11 @@
     <Compile Include="Methods\IRPCMethod.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Runner.cs" />
     <Compile Include="Scheduler.cs" />
     <Compile Include="Communication\ServiceFactory.cs" />
     <Compile Include="Communication\SockHandler.cs" />
+    <Compile Include="Tests\TestDateSort.cs" />
     <Compile Include="Tests\TestHeaderSeperation.cs" />
     <Compile Include="Tests\TestPortSpeedParsing.cs" />
     <Compile Include="Tests\TestJSONtoAction.cs" />
@@ -83,6 +85,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Scripts\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

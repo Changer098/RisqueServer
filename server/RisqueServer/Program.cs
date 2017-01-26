@@ -30,7 +30,7 @@ namespace RisqueServer {
             if (p.config.ticketDirectory != null) p.ticketStorage = new Tickets.TicketStorage(p.config.ticketDirectory);
             else p.ticketStorage = new Tickets.TicketStorage();
             //TODO Properly initalize
-            p.scheduler = new Scheduler();
+            p.scheduler = new Scheduler(p.ticketStorage);
             p.methodMan = new MethodMan(p.ticketStorage, p.scheduler);
             ServiceFactory service = new ServiceFactory(logger, p.methodMan);
             WebServer server = new WebServer(service, logger);

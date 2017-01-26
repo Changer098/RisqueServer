@@ -16,6 +16,7 @@ namespace RisqueServer.Tickets {
     class TicketStorage {
         TicketDirectory ticketDirectory = null;
         Dictionary<int, Tuple<Ticket, TicketStatus>> tickets = null;
+        Scheduler scheduler = null;
         string folderRoot = null;
         Thread WorkerThread;
         int workerRefreshMinutes = 1;         //How often should IOWorker check for updates
@@ -83,6 +84,33 @@ namespace RisqueServer.Tickets {
             }
             WorkerThread = new Thread(() => IOWorker());
             WorkerThread.Start();
+        }
+        /// <summary>
+        /// Registers the ticket scheduler
+        /// </summary>
+        /// <param name="scheduler">Scheduler to store</param>
+        /// <returns>True if the scheduler is null and can be assigned, false otherwise</returns>
+        public bool registerScheduler(Scheduler scheduler) {
+            if (this.scheduler == null) {
+                this.scheduler = scheduler;
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        public Tuple<Ticket, TicketStatus>[] getTicketDict(object caller) {
+            //Dictionary<int, Tuple<Ticket, TicketStatus>> tickets
+            if (caller == scheduler) {
+                Tuple<Ticket, TicketStatus>[] arr = new Tuple<Ticket, TicketStatus>[ticketDirectory.ticketCount];
+                int i = 0;
+                foreach (KeyValuePair<int,Tuple<Ticket, TicketStatus>> item in tickets) {
+                    arr[i] = new Tuple<Ticket, TicketStatus>(item.Value.Item1, item.Value.Item2);
+                    i = i++;
+                }
+                return arr;
+            }
+            return null;
         }
         private bool isValidDirectory(TicketDirectory ticketDirectory) {
             int count = 0;  //How many tickets are actually in directory.json versus its ticketCount
@@ -173,6 +201,7 @@ namespace RisqueServer.Tickets {
                     Console.WriteLine("SCHEDULER STILL HAS TO BE IMPLEMENTED");
                     addedTicket = true;
                     failureReason = null;
+                    WorkerThread.Interrupt();
                     return true;
                 }
                 catch (Exception e) {
@@ -232,7 +261,11 @@ namespace RisqueServer.Tickets {
                     Debug.WriteLine("Sleeping for {0} minutes", sleepTime.Minutes);
                     Thread.Sleep(sleepTime);
                 }
-                catch (ThreadInterruptedException e)
+                catch (ThreadInterruptedException e1) {
+                    //Wake from sleep, add ticket
+                    continue;
+                }
+                catch (ThreadAbortException e2)
                 {
                     Console.WriteLine("TicketStorage thread was interrupted, killing");
                     break;
@@ -264,6 +297,7 @@ namespace RisqueServer.Tickets {
                 //File.WriteAllText(folderRoot + "directory.json", JsonConvert.SerializeObject(ticketDirectory));
                 File.WriteAllText(folderRoot + "directory.json", TicketDirectory.Serialize(this.ticketDirectory));
             }
+            addedTicket = false;
         }
         //Run async
         private void updateStatusFile(int ticketId, bool completed) {

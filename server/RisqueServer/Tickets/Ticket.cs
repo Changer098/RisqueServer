@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using Newtonsoft.Json;
 using System.IO;
+using System.Runtime.Serialization;
 
 namespace RisqueServer.Tickets {
     /// <summary>
     /// Describes a Ticket for Deserializing
     /// </summary>
-    class Ticket {
+    class Ticket : IComparable<Ticket> {
         /*int id;
         Action[] actions;
         DateTime dueBy;
@@ -25,6 +26,12 @@ namespace RisqueServer.Tickets {
         }*/
         public int ticketID { get; set; }
         public string dueBy { get; set; }
+        [JsonIgnore]
+        public DateTime date;
+        [OnDeserialized]
+        internal void OnDeserializedMethod(StreamingContext context) {
+            date = dueBy.fromRisqueTime();
+        }
         public Action[] Actions { get; set; }
         public static Ticket getNull() {
             Ticket newTicket = new Ticket();
@@ -33,6 +40,35 @@ namespace RisqueServer.Tickets {
             newTicket.dueBy = String.Empty;
             newTicket.ticketID = -1;
             return newTicket;
+        }
+        public int CompareTo(Ticket a) {
+            if (this.date > a.date) {
+                return 1;
+            }
+            else if (this.date < a.date) {
+                return -1;
+            }
+            else {
+                return 0;
+            }
+        }
+        public static bool operator >(Ticket a, Ticket b) {
+            int compare = a.CompareTo(b);
+            if (compare == 1) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        public static bool operator <(Ticket a, Ticket b) {
+            int compare = a.CompareTo(b);
+            if (compare == -1) {
+                return true;
+            }
+            else {
+                return false;
+            }
         }
     }
 }

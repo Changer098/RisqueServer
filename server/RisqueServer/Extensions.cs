@@ -39,7 +39,7 @@ namespace RisqueServer {
             builder.AppendFormat("{0}/{1}/{2} {3}:{4} {5}", dt.Month, dt.Day, dt.Year, dt.Minute, dt.Hour, meridiem);
             return builder.ToString();
         }
-        public static DateTime ParseRisqueTime(this string s) {
+        public static DateTime fromRisqueTime(this string s) {
             s = s.Trim();
             string toParse;
             if (s.Last<char>() == ')') {
@@ -50,6 +50,13 @@ namespace RisqueServer {
                 toParse = s;
             }
             return DateTime.Parse(toParse);
+        }
+        //Are we running on Linux?
+        public static bool IsLinux {
+            get {
+                int p = (int)Environment.OSVersion.Platform;
+                return (p == 4) || (p == 6) || (p == 128);
+            }
         }
     }
 }
