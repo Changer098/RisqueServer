@@ -10,7 +10,7 @@ namespace RisqueServer.Tickets {
     /// <summary>
     /// Describes a Ticket for Deserializing
     /// </summary>
-    class Ticket : IComparable<Ticket> {
+    public class Ticket : IComparable<Ticket> {
         /*int id;
         Action[] actions;
         DateTime dueBy;

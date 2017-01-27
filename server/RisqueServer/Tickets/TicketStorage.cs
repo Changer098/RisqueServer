@@ -106,8 +106,9 @@ namespace RisqueServer.Tickets {
                 int i = 0;
                 foreach (KeyValuePair<int,Tuple<Ticket, TicketStatus>> item in tickets) {
                     arr[i] = new Tuple<Ticket, TicketStatus>(item.Value.Item1, item.Value.Item2);
-                    i = i++;
+                    i = i + 1;
                 }
+                i = i;
                 return arr;
             }
             return null;
@@ -199,6 +200,7 @@ namespace RisqueServer.Tickets {
                     tickets.Add(ticket.ticketID, new Tuple<Ticket, TicketStatus>(ticket, status));
                     updateStatusFile(ticket.ticketID, false);
                     Console.WriteLine("SCHEDULER STILL HAS TO BE IMPLEMENTED");
+                    scheduler.storeTicket(ticket);
                     addedTicket = true;
                     failureReason = null;
                     WorkerThread.Interrupt();

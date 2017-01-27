@@ -8,7 +8,7 @@ using Newtonsoft.Json.Converters;
 using System.Runtime.Serialization;
 
 namespace RisqueServer.Tickets {
-    class Action {
+    public class Action {
         /*public string picID { get; set; }
         public string provider { get; set; }
         [JsonProperty("speed")]
