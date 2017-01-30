@@ -29,7 +29,7 @@ namespace RisqueServer.Tickets {
             count += 1;
             last = tick;
         }
-        public void Remove() {
+        public void RemoveLast() {
             //shrink at a quarter full
             if (count == capacity / 4) {
                 //shrink
@@ -42,8 +42,50 @@ namespace RisqueServer.Tickets {
             list[count - 1] = null;
             
         }
+        public void Remove(int ticketId) {
+            int index;
+            if (Contains(ticketId, out index)) {
+                /*if (count == capacity / 4) {
+                    //shrink
+                    Ticket[] tmpList = new Ticket[capacity / 2];
+                    for (int j = 0; j < count; j++) {
+                        tmpList[j] = list[j];
+                    }
+                    capacity = capacity / 4;
+                }
+                list[ticketId] = null;*/
+                //remove from list
+                if (count == capacity / 4) {
+                    Ticket[] tmpList = new Ticket[capacity / 2];
+                    for (int i = 0; i < count; i++) {
+                         //TODO
+                    }
+                }
+                else {
+                    Ticket[] tmpList = new Ticket[capacity];
+                    for (int i = 0; i < count; i++) {
+                        //TODOS
+                    }
+                }
+                
+            }
+            else {
+                throw new ArgumentException("TicketID does not exist");
+            }
+        }
         public void Sort() {
             //Insertion sort
+            for (int i = 1; i < list.Length; i++) {
+                int j = i - 1;
+                Ticket temp = list[i];
+
+                while(j >= 0 && temp < list[j]) {
+                    list[j + 1] = list[j];
+                    j--;
+                }
+
+                list[j + 1] = temp;
+            }
         }
         public bool isSorted() {
             for (int i = 0; i < count - 1; i++) {
@@ -55,6 +97,30 @@ namespace RisqueServer.Tickets {
         }
         public Ticket getLast() {
             return last;
+        }
+        public Ticket get(int ticketId) {
+            int index;
+            if (Contains(ticketId, out index)) {
+                return list[index];
+            }
+            else {
+                return null;
+            }
+        }
+        public bool Contains(int tickedId, out int index) {
+            for (int i = 0; i < count; i++) {
+                if (list[i].ticketID == tickedId) {
+                    index = i;
+                    return true;
+                }
+            }
+            index = -1;
+            return false;
+        }
+        public void printList() {
+            for (int i = 0; i < count; i++) {
+                Console.WriteLine("ID: {0}, Date: {1}", list[i].ticketID, list[i].date);
+            }
         }
 
         public object this[int i] {

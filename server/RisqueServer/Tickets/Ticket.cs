@@ -11,6 +11,12 @@ namespace RisqueServer.Tickets {
     /// Describes a Ticket for Deserializing
     /// </summary>
     public class Ticket : IComparable<Ticket> {
+        //Constructor for Testing
+        public Ticket(int id, DateTime dt) {
+            this.ticketID = id;
+            this.date = dt;
+        }
+        public Ticket() { }
         /*int id;
         Action[] actions;
         DateTime dueBy;
