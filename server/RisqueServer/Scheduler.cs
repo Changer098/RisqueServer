@@ -9,7 +9,7 @@ using RisqueServer.Tickets;
 namespace RisqueServer {
     class Scheduler {
         //Compiler complains but loadTickets() initalizes it
-        ArrayList scheduledTickets = null;
+        TicketList scheduledTickets = null;
         TicketStorage storage;
         //Queue<T> immediateQueue
         Thread mainSchedule;
@@ -23,7 +23,7 @@ namespace RisqueServer {
         }
         //Check if the queue is sorted
         private bool isSorted() {
-            for (int i = 0; i < scheduledTickets.Count - 1; i++) {
+            for (int i = 0; i < scheduledTickets.count - 1; i++) {
                 if ((Ticket)scheduledTickets[i] > (Ticket)scheduledTickets[i + 1]) {
                     return false;
                 }
@@ -36,18 +36,23 @@ namespace RisqueServer {
                 TimeSpan sleepTime = new TimeSpan(0);
                 bool addTicket = false;
                 //Is there anything to do?
-                if (this.scheduledTickets.Count != 0) {
-                    if ((scheduledTickets[0] as Ticket).date <= DateTime.Now) {
-                        //do work
-                        Console.WriteLine("Executing Ticket: {0}", (scheduledTickets[0] as Ticket).ticketID);
-                        storage.completeTicket((scheduledTickets[0] as Ticket).ticketID);
-                        this.scheduledTickets.RemoveAt(0);
-                        //scheduledTickets[0] = scheduledTickets[0];
-                            
+                if (this.scheduledTickets.count != 0) {
+                    if (scheduledTickets[0] == null) {
+                        sleepTime = new TimeSpan(0, 1, 0);
                     }
                     else {
-                        sleepTime = (scheduledTickets[0] as Ticket).date - DateTime.Now;
-                        //Console.WriteLine("Sleeping for {0} minutes", sleepTime.Minutes);
+                        if ((scheduledTickets[0] as Ticket).date <= DateTime.Now) {
+                            //do work
+                            Console.WriteLine("Executing Ticket: {0}", (scheduledTickets[0] as Ticket).ticketID);
+                            storage.completeTicket((scheduledTickets[0] as Ticket).ticketID);
+                            this.scheduledTickets.Remove((scheduledTickets[0] as Ticket).ticketID);
+                            //scheduledTickets[0] = scheduledTickets[0];
+
+                        }
+                        else {
+                            sleepTime = (scheduledTickets[0] as Ticket).date - DateTime.Now;
+                            //Console.WriteLine("Sleeping for {0} minutes", sleepTime.Minutes);
+                        }
                     }
                 }
                 else {
@@ -63,7 +68,7 @@ namespace RisqueServer {
         }
         private void loadTickets() {
             Tuple<Ticket, TicketStatus>[] tickets = storage.getTicketDict(this);
-            scheduledTickets = new ArrayList(tickets.Count() * 2);
+            scheduledTickets = new TicketList(tickets.Count() * 2);
             foreach (Tuple<Ticket, TicketStatus> ticket in tickets) {
                 if (!ticket.Item2.completed) {
                     scheduledTickets.Add(ticket.Item1);
@@ -76,7 +81,7 @@ namespace RisqueServer {
         /// </summary>
         /// <param name="tick">Ticket to add</param>
         public void storeTicket(Ticket tick) {
-            if (scheduledTickets.Count == 0) {
+            if (scheduledTickets.count == 0) {
                 //nothing in the list
                 scheduledTickets.Add(tick);
                 Console.WriteLine("Added ticket");
@@ -86,8 +91,9 @@ namespace RisqueServer {
                     Monitor.Pulse(_lockObject);
                 }
             }
-            else if (scheduledTickets.Count != 0) {
-                if (tick.dueBy.fromRisqueTime() < (scheduledTickets[scheduledTickets.Count - 1] as Ticket).dueBy.fromRisqueTime()) {
+            else if (scheduledTickets.count != 0) {
+                scheduledTickets = scheduledTickets;
+                if (tick.dueBy.fromRisqueTime() < (scheduledTickets[scheduledTickets.count - 1] as Ticket).dueBy.fromRisqueTime()) {
                     scheduledTickets.Add(tick);
                     Console.WriteLine("Added Ticket");
                     new Task(() => {

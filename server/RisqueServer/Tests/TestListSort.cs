@@ -46,5 +46,29 @@ namespace RisqueServer.Tests {
             Console.WriteLine("Sorted list");
             list.printList();
         }
+        [TestCase]
+        public void testRemove() {
+            TicketList list = new TicketList(4);
+            list.Add(new Ticket(5050, new DateTime(2010, 1, 1)));
+            list.Add(new Ticket(8080, new DateTime(2011, 1, 1)));
+            list.Add(new Ticket(5050, new DateTime(2012, 1, 1)));
+            list.printList();
+            list.Remove(8080);
+            list.printList();
+            int blah;
+            Assert.IsFalse(list.Contains(8080, out blah));
+        }
+        [TestCase]
+        public void RemoveDuplicates() {
+            TicketList list = new TicketList(4);
+            list.Add(new Ticket(5050, new DateTime(2010, 1, 1)));
+            list.Add(new Ticket(8080, new DateTime(2011, 1, 1)));
+            list.Add(new Ticket(5050, new DateTime(2012, 1, 1)));
+            list.printList();
+            list.Remove(5050);
+            list.printList();
+            int blah;
+            Assert.IsFalse(list.Contains(5050, out blah));
+        }
     }
 }

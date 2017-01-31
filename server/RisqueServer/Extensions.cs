@@ -29,6 +29,7 @@ namespace RisqueServer {
             //Midnight is 12am, Midday is 12pm
             StringBuilder builder = new StringBuilder();
             bool isPM = (dt.Hour - 12 > 0);
+            int hour = dt.Hour;
             string meridiem;
             if (isPM) {
                 meridiem = "PM";
@@ -36,7 +37,10 @@ namespace RisqueServer {
             else {
                 meridiem = "AM";
             }
-            builder.AppendFormat("{0}/{1}/{2} {3}:{4} {5}", dt.Month, dt.Day, dt.Year, dt.Minute, dt.Hour, meridiem);
+            if (hour != 12) {
+                if (hour - 12 > 0) hour = hour - 12;
+            }
+            builder.AppendFormat("{0}/{1}/{2} {3}:{4} {5}", dt.Month, dt.Day, dt.Year, dt.Minute, hour, meridiem);
             return builder.ToString();
         }
         public static DateTime fromRisqueTime(this string s) {
