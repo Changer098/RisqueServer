@@ -260,7 +260,7 @@ namespace RisqueServer.Tickets {
                         updateDirectoryFile();
                         Console.WriteLine("Updated");
                     }
-                    Debug.WriteLine("Sleeping for {0} minutes", sleepTime.Minutes);
+                    //Debug.WriteLine("Sleeping for {0} minutes", sleepTime.Minutes);
                     Thread.Sleep(sleepTime);
                 }
                 catch (ThreadInterruptedException e1) {

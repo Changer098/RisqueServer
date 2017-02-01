@@ -26,8 +26,8 @@ namespace RisqueServer.Tickets {
             }
             list[count] = tick;
             count = count + 1;
-            last = tick;
-            list = list;
+            //last = tick;
+            //list = list;
         }
         public void RemoveLast() {
             if (count == 0) throw new Exception("No elements in list");
