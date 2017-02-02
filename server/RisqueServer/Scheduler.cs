@@ -18,8 +18,8 @@ namespace RisqueServer {
         Thread mainSchedule;
         private readonly object _lockObject = new object();
         public Scheduler(TicketStorage storage) {
-            StartTime = new DateTime(1, 1, 1, 12, 40, 0);
-            EndTime = new DateTime(1, 1, 1, 12, 45, 0);
+            StartTime = new DateTime(1, 1, 1, 10, 50, 0);
+            EndTime = new DateTime(1, 1, 1, 12, 0, 0);
             mainSchedule = new Thread(loop);
             this.storage = storage;
             this.storage.registerScheduler(this);
@@ -47,7 +47,7 @@ namespace RisqueServer {
                         sleepTime = new TimeSpan(0, 1, 0);
                     }
                     else {
-                        if ((scheduledTickets[0] as Ticket).date <= DateTime.Now) {
+                        if ((scheduledTickets[0] as Ticket).date <= DateTime.Now && isCurrentTime(scheduledTickets[0] as Ticket)) {
                             if (inOperatingHours()) {
                                 //do work
                                 Ticket toExecute = (scheduledTickets[0] as Ticket);
@@ -67,7 +67,12 @@ namespace RisqueServer {
                             }
                         }
                         else {
-                            sleepTime = (scheduledTickets[0] as Ticket).date - DateTime.Now;
+                            //RETURNS Incorrect values for dates prior to the current day
+                            int hours, minutes;
+                            hours = DateTime.Now.Hour - StartTime.Hour;
+                            minutes = DateTime.Now.Minute - StartTime.Minute;
+                            TimeSpan actual = new TimeSpan(Math.Abs(hours), Math.Abs(minutes), 0);
+                            sleepTime = actual;
                             //Console.WriteLine("Sleeping for {0} minutes", sleepTime.Minutes);
                         }
                     }
@@ -106,6 +111,16 @@ namespace RisqueServer {
                 return false;
             }
             return false;
+        }
+        private bool isCurrentTime(Ticket tick) {
+            //check Hour:Minute versus now
+            if (DateTime.Now.Hour < tick.date.Hour) {
+                return false;
+            }
+            if (DateTime.Now.Minute < tick.date.Hour) {
+                return false;
+            }
+            return true;
         }
         private void loadTickets() {
             Tuple<Ticket, TicketStatus>[] tickets = storage.getTicketDict(this);
