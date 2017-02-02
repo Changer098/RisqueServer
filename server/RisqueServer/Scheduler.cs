@@ -18,8 +18,8 @@ namespace RisqueServer {
         Thread mainSchedule;
         private readonly object _lockObject = new object();
         public Scheduler(TicketStorage storage) {
-            StartTime = new DateTime(1, 1, 1, 10, 50, 0);
-            EndTime = new DateTime(1, 1, 1, 12, 0, 0);
+            StartTime = new DateTime(1, 1, 1, 17, 0, 0);
+            EndTime = new DateTime(1, 1, 1, 23, 59, 0);
             mainSchedule = new Thread(loop);
             this.storage = storage;
             this.storage.registerScheduler(this);
@@ -41,7 +41,48 @@ namespace RisqueServer {
                 TimeSpan sleepTime = new TimeSpan(0);
                 bool addTicket = false;
                 //Is there anything to do?
-                if (this.scheduledTickets.count != 0) {
+                if (inOperatingHours()) {
+                    if (scheduledTickets.count != 0) {
+                        if (scheduledTickets[0] == null) {
+                            Debug.WriteLine("First ticket is null!");
+                            sleepTime = new TimeSpan(0, 1, 0);
+                        }
+                        //else if ((scheduledTickets[0] as Ticket).date <= DateTime.Now && isCurrentTime(scheduledTickets[0] as Ticket)) {
+                        if (isCurrentTime(scheduledTickets[0] as Ticket)) {
+                            //do work
+                            Ticket toExecute = (scheduledTickets[0] as Ticket);
+                            Console.WriteLine("Executing Ticket: {0}", toExecute.ticketID);
+                            storage.completeTicket(toExecute.ticketID);
+                            this.scheduledTickets.Remove(toExecute.ticketID);
+                            continue;
+                        }
+                        else {
+                            //Calculate how long to wait until ticket is ready
+                            int hours, minutes;
+                            Ticket nextTicket = (Ticket)scheduledTickets[0];
+                            hours = DateTime.Now.Hour - nextTicket.date.Hour;
+                            minutes = DateTime.Now.Minute - nextTicket.date.Minute;
+                            TimeSpan actual = new TimeSpan(Math.Abs(hours), Math.Abs(minutes), 0);
+                            sleepTime = actual;
+                            //Console.WriteLine("Sleeping for {0} minutes", sleepTime.Minutes);
+                        }
+                    }
+                    else {
+                        //0 tickets in queue
+                        sleepTime = new TimeSpan(1, 0, 0);
+                    }
+                }
+                else {
+                    Debug.WriteLine("not in Operating Hours");
+                    //calculate how long until operating hours
+                    int hours, minutes;
+                    hours = DateTime.Now.Hour - StartTime.Hour;
+                    minutes = DateTime.Now.Minute - StartTime.Minute;
+                    TimeSpan actual = new TimeSpan(Math.Abs(hours), Math.Abs(minutes), 0);
+                    sleepTime = actual;
+                }
+
+                /*if (this.scheduledTickets.count != 0) {
                     if (scheduledTickets[0] == null) {
                         Debug.WriteLine("First ticket is null!");
                         sleepTime = new TimeSpan(0, 1, 0);
@@ -76,11 +117,11 @@ namespace RisqueServer {
                             //Console.WriteLine("Sleeping for {0} minutes", sleepTime.Minutes);
                         }
                     }
-                }
-                else {
+                }*/
+                /*else {
                     //Console.WriteLine("scheduledTickets Count: {0}", this.scheduledTickets.Count);
                     sleepTime = new TimeSpan(1, 0, 0);
-                }
+                }*/
                 Console.WriteLine("Schedule sleep for {0} minutes", sleepTime.TotalMinutes);
                 lock (_lockObject) {
                     Monitor.Wait(_lockObject, sleepTime);
@@ -117,7 +158,7 @@ namespace RisqueServer {
             if (DateTime.Now.Hour < tick.date.Hour) {
                 return false;
             }
-            if (DateTime.Now.Minute < tick.date.Hour) {
+            if (DateTime.Now.Minute < tick.date.Minute) {
                 return false;
             }
             return true;
