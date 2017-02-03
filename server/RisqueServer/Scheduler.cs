@@ -18,8 +18,8 @@ namespace RisqueServer {
         Thread mainSchedule;
         private readonly object _lockObject = new object();
         public Scheduler(TicketStorage storage) {
-            StartTime = new DateTime(1, 1, 1, 17, 0, 0);
-            EndTime = new DateTime(1, 1, 1, 23, 59, 0);
+            StartTime = new DateTime(1, 1, 1, 12, 35, 0);
+            EndTime = new DateTime(1, 1, 1, 12, 55, 0);
             mainSchedule = new Thread(loop);
             this.storage = storage;
             this.storage.registerScheduler(this);

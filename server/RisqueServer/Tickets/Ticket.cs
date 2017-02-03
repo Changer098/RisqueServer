@@ -48,6 +48,9 @@ namespace RisqueServer.Tickets {
             return newTicket;
         }
         public int CompareTo(Ticket a) {
+            if (a == null) {
+                throw new Exception("Supplied ticket is null");
+            }
             if (this.date > a.date) {
                 return 1;
             }
@@ -59,6 +62,9 @@ namespace RisqueServer.Tickets {
             }
         }
         public static bool operator >(Ticket a, Ticket b) {
+            if (a == null || b == null) {
+                throw new Exception("A parameter is null");
+            }
             int compare = a.CompareTo(b);
             if (compare == 1) {
                 return true;
@@ -68,6 +74,9 @@ namespace RisqueServer.Tickets {
             }
         }
         public static bool operator <(Ticket a, Ticket b) {
+            if (a == null || b == null) {
+                throw new Exception("A parameter is null");
+            }
             int compare = a.CompareTo(b);
             if (compare == -1) {
                 return true;

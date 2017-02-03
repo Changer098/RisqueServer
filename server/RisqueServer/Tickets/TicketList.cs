@@ -116,7 +116,7 @@ namespace RisqueServer.Tickets {
         public void Sort() {
             //Insertion sort
             if (count == 0 ||  count == 1) return;
-            for (int i = 1; i < list.Length; i++) {
+            for (int i = 1; i < count; i++) {
                 int j = i - 1;
                 Ticket temp = list[i];
 
