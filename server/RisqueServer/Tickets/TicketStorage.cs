@@ -13,7 +13,7 @@ namespace RisqueServer.Tickets {
     /// <summary>
     /// Controls where tickets are stored and where to store tickets
     /// </summary>
-    class TicketStorage {
+    public class TicketStorage {
         TicketDirectory ticketDirectory = null;
         Dictionary<int, Tuple<Ticket, TicketStatus>> tickets = null;
         Scheduler scheduler = null;
@@ -25,7 +25,9 @@ namespace RisqueServer.Tickets {
         /// Default Constructor that chains the Main Constructor
         /// </summary>
         /// <seealso cref="TicketStorage(string path)"/>
-        public TicketStorage() : this(System.Environment.CurrentDirectory + "\\Tickets") { }
+        public TicketStorage() : this(getConstructorPath()) {
+            Console.WriteLine("Called Default Constructor");
+        }
 
         /// <summary>
         /// Main Constructor
@@ -49,6 +51,7 @@ namespace RisqueServer.Tickets {
 
             if (Directory.Exists(path)) {
                 //try and load directory.json
+                Debug.WriteLine("Directory exists");
                 string fileDirectory; 
                 if (isRightSlash) fileDirectory = path + @"directory.json";
                 else fileDirectory = path + @"directory.json";
@@ -72,18 +75,53 @@ namespace RisqueServer.Tickets {
             }
             else {
                 //create path
-                this.folderRoot = path;
-                DirectoryInfo inf = Directory.CreateDirectory(System.Environment.CurrentDirectory + "\\Tickets");
+                Console.WriteLine("Directory does not exist, path=" + path);
+                this.folderRoot = path;       
+                if (Extensions.IsLinux) {
+                    Console.WriteLine("Creating Directory at: {0}", System.Environment.CurrentDirectory + @"/Tickets");
+                    Directory.CreateDirectory(System.Environment.CurrentDirectory + @"/Tickets");
+                }
+                else {
+                    Console.WriteLine("Creating Directory at: {0}", System.Environment.CurrentDirectory + @"\Tickets");
+                    Directory.CreateDirectory(System.Environment.CurrentDirectory + @"\Tickets");
+                }
+                
                 //create directory.json
+                Debug.WriteLine("Creating TicketDirectory Object");
                 TicketDirectory directory = new TicketDirectory(0);
                 string jsonData = JsonConvert.SerializeObject(directory);
-                string directoryPath = path + @"\directory.json";
+                string directoryPath = String.Empty;
+                directoryPath = path + "directory.json";
+                /*if (Extensions.IsLinux) {
+                    Console.WriteLine("Is Linux");
+                    directoryPath = path + @"/directory.json";
+                }
+                else {
+                    Console.WriteLine("Is NOT Linux");
+                    directoryPath = path + @"\directory.json";
+                }*/
+                Console.WriteLine("Directory path: " + directoryPath);
                 using (StreamWriter writer = File.CreateText(directoryPath)) {
                     writer.Write(jsonData);
                 }
+                //create TicketDirectory!!
+                ticketDirectory = new TicketDirectory(0);
+                this.tickets = new Dictionary<int, Tuple<Ticket, TicketStatus>>(ticketDirectory.ticketCount);
             }
+            Debug.WriteLine("Starting IOWorker thread");
             WorkerThread = new Thread(() => IOWorker());
             WorkerThread.Start();
+        }
+        //fix the constructor field in windows v linux
+        public static string getConstructorPath() {
+            if (Extensions.IsLinux) {
+                Console.WriteLine("getConstructor: is linux");
+                return System.Environment.CurrentDirectory + "/Tickets";
+            }
+            else {
+                Console.WriteLine("getConstructor: is not linux");
+                return System.Environment.CurrentDirectory + @"\Tickets";
+            }
         }
         /// <summary>
         /// Registers the ticket scheduler
@@ -101,13 +139,21 @@ namespace RisqueServer.Tickets {
         }
         public Tuple<Ticket, TicketStatus>[] getTicketDict(object caller) {
             //Dictionary<int, Tuple<Ticket, TicketStatus>> tickets
+            Debug.WriteLine("Called getTicketDict");
             if (caller == scheduler) {
+                Debug.WriteLine("Caller check passed");
+                if (ticketDirectory == null) {
+                    Debug.WriteLine("TicketDirectory is Null!");
+                }
                 Tuple<Ticket, TicketStatus>[] arr = new Tuple<Ticket, TicketStatus>[ticketDirectory.ticketCount];
                 int i = 0;
+                Debug.WriteLine("Created Ticket, TicketStatus tuple");
                 foreach (KeyValuePair<int,Tuple<Ticket, TicketStatus>> item in tickets) {
+                    Debug.WriteLine("i: " + i);
                     arr[i] = new Tuple<Ticket, TicketStatus>(item.Value.Item1, item.Value.Item2);
                     i = i + 1;
                 }
+                Debug.WriteLine("Exited loop");
                 i = i;
                 return arr;
             }
@@ -162,10 +208,10 @@ namespace RisqueServer.Tickets {
                 return false;
             }
         }
-        private string getAbsoluteFileLocation(string path) {
+        public string getAbsoluteFileLocation(string path) {
             return path.Replace("./", folderRoot);
         }
-        private string getAbsoluteFolderLocation(string path) {
+        public string getAbsoluteFolderLocation(string path) {
             return getAbsoluteFileLocation(path) + '\\';
         }
         /// <summary>
@@ -184,8 +230,13 @@ namespace RisqueServer.Tickets {
             }
             else {
                 try {
-                    string fullPath = Directory.CreateDirectory(folderRoot + ticket.ticketID).FullName + '\\';
-                    //fullPath = fullPath;
+                    string fullPath = null;
+                    if (Extensions.IsLinux) {
+                        fullPath = Directory.CreateDirectory(folderRoot + ticket.ticketID).FullName + '/';
+                    }
+                    else {
+                        fullPath = Directory.CreateDirectory(folderRoot + ticket.ticketID).FullName + '\\';
+                    }
                     File.WriteAllText(fullPath + "ticket.json", JsonConvert.SerializeObject(ticket));
                     ticketDirectory.ticketCount = ticketDirectory.ticketCount + 1;
                     string relativeFolder = "./" + ticket.ticketID + '/';
@@ -329,6 +380,9 @@ namespace RisqueServer.Tickets {
         public void completeTicket(int tickedId) {
             Console.WriteLine("Completed: " + tickedId);
             updateStatusFile(tickedId, true);
+        }
+        public StoredDetails getStoredDetails(int ticketId) {
+            return ticketDirectory.tickets[ticketId];
         }
 
         //Run async

@@ -63,7 +63,7 @@
     <Compile Include="Methods\IRPCMethod.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Runner.cs" />
+    <Compile Include="ScriptRunner.cs" />
     <Compile Include="Scheduler.cs" />
     <Compile Include="Communication\ServiceFactory.cs" />
     <Compile Include="Communication\SockHandler.cs" />

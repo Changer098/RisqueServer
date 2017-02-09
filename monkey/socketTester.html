@@ -27,8 +27,9 @@
             var Socket;
             console.log("Trying to connect");
             try {
-                Socket = new WebSocket("ws://localhost:8181");
-                //Socket = new WebSocket("ws://glitch.tcom.purdue.edu:8181");
+                //Socket = new WebSocket("ws://localhost:8181");		//Localhost Windows
+                Socket = new WebSocket("ws://glitch.tcom.purdue.edu:8181");
+				//Socket = new WebSocket("ws://10.160.1.33:8181");		//Localhost Ubuntu
                 Socket.onopen = function () {
                     console.log("Succesfully connected to WebSocket");
                     _check.checked = true;

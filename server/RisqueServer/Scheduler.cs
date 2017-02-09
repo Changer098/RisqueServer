@@ -8,7 +8,7 @@ using System.Diagnostics;
 using RisqueServer.Tickets;
 
 namespace RisqueServer {
-    class Scheduler {
+    public class Scheduler {
         //Compiler complains but loadTickets() initalizes it
         TicketList scheduledTickets = null;
         DateTime StartTime;     //5:30PM
@@ -17,9 +17,9 @@ namespace RisqueServer {
         //Queue<T> immediateQueue
         Thread mainSchedule;
         private readonly object _lockObject = new object();
-        public Scheduler(TicketStorage storage) {
-            StartTime = new DateTime(1, 1, 1, 12, 35, 0);
-            EndTime = new DateTime(1, 1, 1, 12, 55, 0);
+        public Scheduler(TicketStorage storage) {  
+            StartTime = new DateTime(1, 1, 1, 8, 0, 0);
+            EndTime = new DateTime(1, 1, 1, 19, 0, 0);
             mainSchedule = new Thread(loop);
             this.storage = storage;
             this.storage.registerScheduler(this);
@@ -34,6 +34,10 @@ namespace RisqueServer {
                 }
             }
             return true;
+        }
+        public void completeTicket(int tickedId) {
+            storage.completeTicket(tickedId);
+            this.scheduledTickets.Remove(tickedId);
         }
         private void loop() {
             //do stuff here
@@ -51,9 +55,9 @@ namespace RisqueServer {
                         if (isCurrentTime(scheduledTickets[0] as Ticket)) {
                             //do work
                             Ticket toExecute = (scheduledTickets[0] as Ticket);
-                            Console.WriteLine("Executing Ticket: {0}", toExecute.ticketID);
-                            storage.completeTicket(toExecute.ticketID);
-                            this.scheduledTickets.Remove(toExecute.ticketID);
+                            //Console.WriteLine("Executing Ticket: {0}", toExecute.ticketID);
+                            ScriptRunner.modifyTicket((scheduledTickets[0] as Ticket).ticketID, this);
+                            //completeTicket((scheduledTickets[0] as Ticket).ticketID);
                             continue;
                         }
                         else {
@@ -164,7 +168,9 @@ namespace RisqueServer {
             return true;
         }
         private void loadTickets() {
+            Debug.WriteLine("Loading tickets");
             Tuple<Ticket, TicketStatus>[] tickets = storage.getTicketDict(this);
+            Debug.WriteLine("Got Ticket Dictionary");
             scheduledTickets = new TicketList(tickets.Count() * 2);
             foreach (Tuple<Ticket, TicketStatus> ticket in tickets) {
                 if (!ticket.Item2.completed) {
@@ -210,7 +216,14 @@ namespace RisqueServer {
             else {
                 Console.WriteLine("Dunno");
             }
-            
+
+        }
+        public string getTicketLocation(int ticketId) {
+            if (storage.containsTicket(ticketId)) {
+                StoredDetails details = storage.getStoredDetails(ticketId);
+                return storage.getAbsoluteFileLocation(details.ticketLocation);
+            }
+            return null;
         }
     }
 }

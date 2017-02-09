@@ -25,16 +25,23 @@ namespace RisqueServer {
                 Console.WriteLine("Failed to read config file");
                 return;
             }
+            Debug.WriteLine("Creating logger");
             WebLogger logger = new WebLogger();
             //TODO Properly initialize
+            Debug.WriteLine("Initalizing ticketStorage");
             if (p.config.ticketDirectory != null) p.ticketStorage = new Tickets.TicketStorage(p.config.ticketDirectory);
             else p.ticketStorage = new Tickets.TicketStorage();
             //TODO Properly initalize
+            Debug.WriteLine("Creating Scheduler");
             p.scheduler = new Scheduler(p.ticketStorage);
+            Debug.WriteLine("Creating Method Manager");
             p.methodMan = new MethodMan(p.ticketStorage, p.scheduler);
+            Debug.WriteLine("Creating Service Factory");
             ServiceFactory service = new ServiceFactory(logger, p.methodMan);
+            Debug.WriteLine("Creating Web Server");
             WebServer server = new WebServer(service, logger);
             server.Listen(p.config.port);
+            Debug.WriteLine("Main() is listening");
             Console.ReadKey();
         }
         /// <summary>
@@ -43,6 +50,7 @@ namespace RisqueServer {
         /// <param name="prog"></param>
         /// <param name="args"></param>
         static void parseArgs(Program prog, string[] args) {
+            Debug.WriteLine("Args length: " + args.Length);
             ParsedConfigFile configFile = null;
             string directLocation = null;
             bool markVerbose = false;
@@ -81,16 +89,26 @@ namespace RisqueServer {
                     //verbose output. OVERRIDES CONFIG Settings
                     markVerbose = true;
                 }
-                if (configFile != null) {
-                    prog.config = new ActiveConfig();
-                    prog.config.hasConfig = true;
-                    prog.config.port = configFile.port;
-                    prog.config.portSecure = configFile.portSecure;
-                    prog.config.ticketDirectory = directLocation;
-                    if (markVerbose) { prog.config.verbose = true; }
-                    else { prog.config.verbose = configFile.verbose; }
-                }
             }
+            if (configFile != null) {
+                //Debug.WriteLine("configFile field is not null");
+                prog.config = new ActiveConfig();
+                prog.config.hasConfig = true;
+                prog.config.port = configFile.port;
+                prog.config.portSecure = configFile.portSecure;
+                prog.config.ticketDirectory = directLocation;
+                if (markVerbose) { prog.config.verbose = true; }
+                else { prog.config.verbose = configFile.verbose; }
+            }
+            else {
+                //Debug.WriteLine("configFile field is null");
+                prog.config = new ActiveConfig();
+                prog.config.hasConfig = false;
+                prog.config.port = 8181;
+                prog.config.portSecure = 401;
+                prog.config.ticketDirectory = null;
+            }
+            Debug.WriteLine("Parsed args");
         }
         static void printHelp() {
             Console.WriteLine("-h --h \t Shows this Help Screen");
