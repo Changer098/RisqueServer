@@ -50,7 +50,7 @@ namespace RisqueServer {
         /// <param name="prog"></param>
         /// <param name="args"></param>
         static void parseArgs(Program prog, string[] args) {
-            Debug.WriteLine("Args length: " + args.Length);
+            Console.WriteLine("Args length: " + args.Length);
             ParsedConfigFile configFile = null;
             string directLocation = null;
             bool markVerbose = false;
@@ -63,7 +63,7 @@ namespace RisqueServer {
                         fileName = args[++i];   //get the string of the next argument
                     }
                     catch (Exception) {
-                        Debug.WriteLine("Failed to read config File location");
+                        Console.WriteLine("Failed to read config File location");
                     }
                     configFile = parseConfig(fileName);
                 }
@@ -75,7 +75,7 @@ namespace RisqueServer {
                         directoryLocation = args[++i];   //get the string of the next argument
                     }
                     catch (Exception) {
-                        Debug.WriteLine("Failed to read ticket directory location");
+                        Console.WriteLine("Failed to read ticket directory location");
                     }
                     directLocation = directoryLocation;
                 }
@@ -91,7 +91,7 @@ namespace RisqueServer {
                 }
             }
             if (configFile != null) {
-                //Debug.WriteLine("configFile field is not null");
+                Console.WriteLine("configFile field is not null");
                 prog.config = new ActiveConfig();
                 prog.config.hasConfig = true;
                 prog.config.port = configFile.port;
@@ -101,14 +101,14 @@ namespace RisqueServer {
                 else { prog.config.verbose = configFile.verbose; }
             }
             else {
-                //Debug.WriteLine("configFile field is null");
+                Console.WriteLine("configFile field is null");
                 prog.config = new ActiveConfig();
                 prog.config.hasConfig = false;
                 prog.config.port = 8181;
                 prog.config.portSecure = 401;
                 prog.config.ticketDirectory = null;
             }
-            Debug.WriteLine("Parsed args");
+            Console.WriteLine("Parsed args");
         }
         static void printHelp() {
             Console.WriteLine("-h --h \t Shows this Help Screen");

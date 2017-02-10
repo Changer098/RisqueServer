@@ -104,4 +104,27 @@ Method Summary
 			"success" : boolean,
 			"failureReason" : String
 		}
+	},
+	"getScheduledCount" : {
+		"params" : {},
+		"returns" : {
+			"count" : int,
+			"tickedIds" : [
+				int
+			],
+			"success" : boolean,
+			"failureReason" : String
+		}
+	},
+	"getTicketStatus" : {
+		"params" : {
+			"ticketId" : int,
+		},
+		"returns" : {
+			"completed" : boolean,
+			"completionDate" : String,
+			"user" : String,
+			"success" : boolean,
+			"failureReason" : String
+		}
 	}

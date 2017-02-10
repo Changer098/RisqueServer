@@ -63,7 +63,9 @@ namespace RisqueServer.Tickets {
                     this.folderRoot = path;
                     using (StreamReader reader = new StreamReader(fileDirectory)) {
                         //this.ticketDirectory = JsonConvert.DeserializeObject<TicketDirectory>(reader.ReadToEnd());
-                        this.ticketDirectory = TicketDirectory.Deserialize(reader.ReadToEnd());
+                        string readToEnd = reader.ReadToEnd();
+                        Console.WriteLine(readToEnd);
+                        this.ticketDirectory = TicketDirectory.Deserialize(readToEnd);
                     }
                     //Validate directory
                     if (!isValidDirectory(this.ticketDirectory)) {
@@ -166,15 +168,15 @@ namespace RisqueServer.Tickets {
             this.tickets = new Dictionary<int, Tuple<Ticket, TicketStatus>>(ticketDirectory.ticketCount);
             foreach (KeyValuePair<int, StoredDetails> entry in ticketDirectory.tickets) {
                 if (!File.Exists(getAbsoluteFileLocation(entry.Value.ticketLocation))) {
-                    Console.WriteLine("{0} does not exist", getAbsoluteFileLocation(entry.Value.ticketLocation));
+                    Console.WriteLine("{0} does not exist -  isValidDirectory ticketLocation", getAbsoluteFileLocation(entry.Value.ticketLocation));
                     return false;
                 }
                 if (!Directory.Exists(getAbsoluteFolderLocation(entry.Value.folderLocation))) {
-                    Console.WriteLine("{0} does not exist", getAbsoluteFolderLocation(entry.Value.folderLocation));
+                    Console.WriteLine("{0} does not exist -  isValidDirectory folderLocation", getAbsoluteFolderLocation(entry.Value.folderLocation));
                     return false;
                 }
                 if (!File.Exists(getAbsoluteFileLocation(entry.Value.statusLocation))) {
-                    Console.WriteLine("{0} does not exist", getAbsoluteFileLocation(entry.Value.statusLocation));
+                    Console.WriteLine("{0} does not exist -  isValidDirectory statusLocation", getAbsoluteFileLocation(entry.Value.statusLocation));
                     return false;
                 }
                 if (!LoadTicket(getAbsoluteFileLocation(entry.Value.ticketLocation), getAbsoluteFileLocation(entry.Value.statusLocation))) {
@@ -212,7 +214,12 @@ namespace RisqueServer.Tickets {
             return path.Replace("./", folderRoot);
         }
         public string getAbsoluteFolderLocation(string path) {
-            return getAbsoluteFileLocation(path) + '\\';
+            if (Extensions.IsLinux) {
+                return getAbsoluteFileLocation(path) + '/';
+            }
+            else {
+                return getAbsoluteFileLocation(path) + '\\';
+            }
         }
         /// <summary>
         /// Stores a ticket and adds it to the scheduler
