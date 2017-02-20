@@ -10,7 +10,7 @@ using RisqueServer.Tickets;
 namespace RisqueServer {
     public class Scheduler {
         //Compiler complains but loadTickets() initalizes it
-        TicketList scheduledTickets = null;
+        public TicketList scheduledTickets = null;
         DateTime StartTime;     //5:30PM
         DateTime EndTime;       //11:55PM
         TicketStorage storage;

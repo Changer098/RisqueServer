@@ -228,7 +228,6 @@ namespace RisqueServer.Tickets {
         /// <param name="failureReason">Reason why the method failed</param>
         /// <returns>Whether the ticket was successfully stored</returns>
         public bool storeTicket(Ticket ticket, out string failureReason) {
-            //TODO Implement
             //Set addedTicket = true
             //create folder with given ticketId as name
             if (Directory.Exists(folderRoot + ticket.ticketID)) {
@@ -388,8 +387,25 @@ namespace RisqueServer.Tickets {
             Console.WriteLine("Completed: " + tickedId);
             updateStatusFile(tickedId, true);
         }
-        public StoredDetails getStoredDetails(int ticketId) {
-            return ticketDirectory.tickets[ticketId];
+        public StoredDetails getStoredDetails(int ticketId, out bool success) {
+            if (ticketDirectory.tickets.ContainsKey(ticketId)) {
+                success = true;
+                return ticketDirectory.tickets[ticketId];
+            }
+            else {
+                success = false;
+                return null;
+            }
+        }
+        public TicketStatus getTicketStatus(int ticketId, out bool success) {
+            if (ticketDirectory.tickets.ContainsKey(ticketId)) {
+                success = true;
+                return tickets[ticketId].Item2;
+            }
+            else {
+                success = false;
+                return null;
+            }
         }
 
         //Run async

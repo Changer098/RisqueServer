@@ -18,7 +18,6 @@ namespace RisqueServer.Methods {
         /// </summary>
         /// <see cref="TicketStorage.storeTicket(Ticket)"/>
         public JObject run(JObject args) {
-            //TODO Implement
             //Utilize TicketStorage.storeTicket
             try {
                 Ticket ticket = args.ToObject<Ticket>();
