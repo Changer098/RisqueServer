@@ -25,6 +25,8 @@ namespace RisqueServer.Methods {
             methodDictionary.Add("checkTicket", new checkTicket(scheduler));
             methodDictionary.Add("doesTicketExist", new doesTicketExist(storage));
             methodDictionary.Add("getTicketInfo", new getTicketInfo(storage));
+            methodDictionary.Add("getScheduledCount", new getScheduledCount(scheduler));
+            methodDictionary.Add("getTicketStatus", new getTicketStatus(storage));
             MethodMan.getActiveManager = this;
         }
         /// <summary>

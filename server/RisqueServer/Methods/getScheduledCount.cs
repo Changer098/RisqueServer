@@ -8,7 +8,7 @@ using RisqueServer.Tickets;
 namespace RisqueServer.Methods {
     class getScheduledCount : IRPCMethod {
         Scheduler scheduler;
-        getScheduledCount(Scheduler scheduler) {
+        public getScheduledCount(Scheduler scheduler) {
             this.scheduler = scheduler;
         }
         public JObject run(JObject args) {

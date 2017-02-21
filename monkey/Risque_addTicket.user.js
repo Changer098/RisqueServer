@@ -7,9 +7,10 @@
 // ==/UserScript==
 
 //Buttons
-var _enableButton;
-var _addButton;
-var _connectionButton;
+var _enableButton;                                      //Enable the functionality of this script
+var _addButton;                                         //The Add Ticket Button
+var _connectionButton;                                  //The Connect Button
+var _checkStatusButton;                                 //Check the Status of the Ticket button
 
 //Risque Globals
 var _dropDownMenu;
@@ -63,6 +64,7 @@ function createAddButton() {
     _dropDownMenu.appendChild(listItem);
     _addButton = Aobj;
 }
+//Eventually add remove button
 function createConnectionButton() {
     var actionsDropdown = document.getElementById("contentMain_A1");
     var btnGroup = actionsDropdown.parentNode;
@@ -75,6 +77,19 @@ function createConnectionButton() {
     //listItem.style.backgroundColor = "#ffcfbf";
     _dropDownMenu.appendChild(listItem);
     _connectionButton = Aobj;
+}
+function createCheckButton() {
+    var actionsDropdown = document.getElementById("contentMain_A1");
+    var btnGroup = actionsDropdown.parentNode;
+    //create Button
+    var listItem = document.createElement("LI");
+    var Aobj = document.createElement("A");
+    Aobj.appendChild(document.createTextNode("Check Status"));
+    Aobj.onclick = checkStatusClick;
+    listItem.appendChild(Aobj);
+    //listItem.style.backgroundColor = "#ffcfbf";
+    _dropDownMenu.appendChild(listItem);
+    _checkStatusButton = Aobj;
 }
 function SockRecievedMessage(evt) {
     console.log("Recieved: " + evt.data);
@@ -139,6 +154,7 @@ function enableClick() {
         _enableButton.parentNode.removeChild(_enableButton);
         //create other buttons
         createAddButton();
+        createCheckButton();
         createConnectionButton();
         createSocket();
     }
@@ -378,6 +394,35 @@ function connectClick() {
         createSocket();
     }
 }
+function checkStatusClick() {
+    if (_sock != null) {
+        var ticketID = document.getElementById("contentMain_lblTicketID").innerText;
+        var requestObject = { method: "getTicketStatus", params: { id: ticketID } };
+        _recieveCallback = function (message) {
+            _recieveCallback = null;
+            console.log("Recieved callback CHECKSTATUS");
+            var indexOfFirstNewLine = message.indexOf('\n');
+            var newMessage = message.substring(indexOfFirstNewLine, message.length);
+            var parsed = JSON.parse(newMessage);
+            if (parsed.success) {
+                if (parsed.completed) {
+                    alert("Ticket was completed on " + parsed.completionDate + " by " + parsed.user);
+                }
+                else {
+                    alert("Ticket has not been completed yet");
+                }
+            }
+            else {
+                throw "Method failed to execute";
+            }
+        };
+        _sock.send("Content-Type: json" + '\n' + JSON.stringify(requestObject) + '\n');
+        console.log("clicked Check Ticket Status");
+    }
+    else {
+        console.log("WebSocket is null");
+    }
+}
 
 function createEnableButton() {
     var actionsDropdown = document.getElementById("contentMain_A1");
@@ -419,6 +464,7 @@ function isEnabled() {
         //create other buttons
         console.log("Has cookie");
         createAddButton();
+        createCheckButton();
         createConnectionButton();
         createSocket();
     }
