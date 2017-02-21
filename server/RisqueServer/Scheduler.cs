@@ -220,7 +220,8 @@ namespace RisqueServer {
         }
         public string getTicketLocation(int ticketId) {
             if (storage.containsTicket(ticketId)) {
-                StoredDetails details = storage.getStoredDetails(ticketId);
+                bool success;
+                StoredDetails details = storage.getStoredDetails(ticketId, out success);
                 return storage.getAbsoluteFileLocation(details.ticketLocation);
             }
             return null;

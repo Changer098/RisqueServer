@@ -58,7 +58,9 @@
     <Compile Include="Methods\addTicketInfo.cs" />
     <Compile Include="Methods\checkTicket.cs" />
     <Compile Include="Methods\doesTicketExist.cs" />
+    <Compile Include="Methods\getScheduledCount.cs" />
     <Compile Include="Methods\getTicketInfo.cs" />
+    <Compile Include="Methods\getTicketStatus.cs" />
     <Compile Include="Methods\MethodMan.cs" />
     <Compile Include="Methods\IRPCMethod.cs" />
     <Compile Include="Program.cs" />
