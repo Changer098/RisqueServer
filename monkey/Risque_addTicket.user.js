@@ -23,7 +23,7 @@ var _recieveCallback = new Function("message");         //The callback the socke
 var _isConnected = false;
 var _isConnecting = false;
 
-function createButton() {
+/*function createButton() {
     var actionsDropdown = document.getElementById("contentMain_A1");
     var btnGroup = actionsDropdown.parentNode;
     //create Button
@@ -48,9 +48,9 @@ function createButton() {
             break;
         }
     }
-    /*btnGroup.childNodes[3].appendChild(button);*/
+    //btnGroup.childNodes[3].appendChild(button);
     //createSocket();
-}
+}*/
 function createAddButton() {
     var actionsDropdown = document.getElementById("contentMain_A1");
     var btnGroup = actionsDropdown.parentNode;
@@ -90,6 +90,19 @@ function createCheckButton() {
     //listItem.style.backgroundColor = "#ffcfbf";
     _dropDownMenu.appendChild(listItem);
     _checkStatusButton = Aobj;
+}
+function createRemoveButton() {
+    var actionsDropdown = document.getElementById("contentMain_A1");
+    var btnGroup = actionsDropdown.parentNode;
+    //create Button
+    var listItem = document.createElement("LI");
+    var Aobj = document.createElement("A");
+    Aobj.appendChild(document.createTextNode("Remove Ticket"));
+    Aobj.onclick = removeClick;
+    listItem.appendChild(Aobj);
+    //listItem.style.backgroundColor = "#ffcfbf";
+    _dropDownMenu.appendChild(listItem);
+    _addButton = Aobj;
 }
 function SockRecievedMessage(evt) {
     console.log("Recieved: " + evt.data);
@@ -153,10 +166,7 @@ function enableClick() {
         //remove enable button
         _enableButton.parentNode.removeChild(_enableButton);
         //create other buttons
-        createAddButton();
-        createCheckButton();
-        createConnectionButton();
-        createSocket();
+        populate();
     }
     else {
         //clicked cancel
@@ -199,6 +209,13 @@ function containsTicket(successCallback, failCallback) {
     alert("Clicked button!");
     testGet();
 }*/
+function populate() {
+    createAddButton();
+    createRemoveButton();
+    createCheckButton();
+    createConnectionButton();
+    createSocket();
+}
 function AddTicket(Ticket, successCallback) {
     if (_sock != null) {
         var Request = {
@@ -387,6 +404,43 @@ function addClick() {
         }
     })
 }
+function removeClick() {
+    //check if ticket exists
+    if (containsTicket(function () {
+        console.log("Remove contains ticket");
+        //remove ticket
+        if (_sock != null) {
+            console.log("Sock isn't null");
+            var ticketID = document.getElementById("contentMain_lblTicketID").innerText;
+            var requestObject = { method: "removeTicket", params: { id: ticketID } };
+            _recieveCallback = function (message) {
+                _recieveCallback = null;
+                console.log("Recieved callback REMOVETICKET");
+                var indexOfFirstNewLine = message.indexOf('\n');
+                var newMessage = message.substring(indexOfFirstNewLine, message.length);
+                var parsedObj = JSON.parse(newMessage);
+                if (parsedObj.success) {
+                    window.alert("Removed Ticket");
+                }
+                else {
+                    window.alert("FailureReason: " + parsedObj.failureReason);
+                }
+            };
+            if (window.confirm("Do you want to remove this Ticket?")) {
+                _sock.send("Content-Type: json" + '\n' + JSON.stringify(requestObject) + '\n');
+            }
+        }
+        else {
+            console.log("Socket is closed");
+            throw "Socket is null, must be closed or something?";
+        }
+    })) {
+        
+    }
+    else {
+        window.alert("Ticket is not in the Server");
+    }
+}
 
 function connectClick() {
     console.log("Clicked connect button");
@@ -463,10 +517,7 @@ function isEnabled() {
     if (hasCookie) {
         //create other buttons
         console.log("Has cookie");
-        createAddButton();
-        createCheckButton();
-        createConnectionButton();
-        createSocket();
+        populate();
     }
     else {
         //create enable button
