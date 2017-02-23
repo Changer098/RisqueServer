@@ -127,4 +127,13 @@ Method Summary
 			"success" : boolean,
 			"failureReason" : String
 		}
+	},
+	"removeTicket" : {
+		"params" : {
+			"ticketId" : int,
+		},
+		"returns" : {
+			"success" : boolean,
+			"failureReason" : String
+		}
 	}

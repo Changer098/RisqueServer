@@ -159,6 +159,9 @@ namespace RisqueServer {
         }
         private bool isCurrentTime(Ticket tick) {
             //check Hour:Minute versus now
+            if (DateTime.Now.Day != tick.date.Day) {
+                return false;
+            }
             if (DateTime.Now.Hour < tick.date.Hour) {
                 return false;
             }

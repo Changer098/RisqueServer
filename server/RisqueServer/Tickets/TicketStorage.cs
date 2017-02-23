@@ -20,7 +20,7 @@ namespace RisqueServer.Tickets {
         string folderRoot = null;
         Thread WorkerThread;
         int workerRefreshMinutes = 1;         //How often should IOWorker check for updates
-        bool addedTicket;
+        bool addedTicket = false, removedTicket = false;
         /// <summary>
         /// Default Constructor that chains the Main Constructor
         /// </summary>
@@ -312,7 +312,7 @@ namespace RisqueServer.Tickets {
             {
                 try {
                     
-                    if (addedTicket)
+                    if (addedTicket || removedTicket)
                     {
                         updateDirectoryFile();
                         Console.WriteLine("Updated");
@@ -357,6 +357,7 @@ namespace RisqueServer.Tickets {
                 File.WriteAllText(folderRoot + "directory.json", TicketDirectory.Serialize(this.ticketDirectory));
             }
             addedTicket = false;
+            removedTicket = false;
         }
         //Run async
         private void updateStatusFile(int ticketId, bool completed) {
@@ -420,6 +421,22 @@ namespace RisqueServer.Tickets {
                 File.Delete(path);
             }
             File.WriteAllText(path, JsonConvert.SerializeObject(ticket));
+        }
+
+        public bool removeTicket(int ticketId) {
+            if (ticketDirectory.tickets.ContainsKey(ticketId)) {
+                ticketDirectory.tickets.Remove(ticketId);
+                ticketDirectory.ticketCount = ticketDirectory.ticketCount - 1;
+                tickets.Remove(ticketId);
+                scheduler.scheduledTickets.Remove(ticketId);
+                scheduler.scheduledTickets.count = scheduler.scheduledTickets.count - 1;
+                removedTicket = true;
+                WorkerThread.Interrupt();
+                return true;
+            }
+            else {
+                return false;
+            }
         }
     }
     /// <summary>

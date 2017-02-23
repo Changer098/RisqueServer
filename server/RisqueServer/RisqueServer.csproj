@@ -63,6 +63,7 @@
     <Compile Include="Methods\getTicketStatus.cs" />
     <Compile Include="Methods\MethodMan.cs" />
     <Compile Include="Methods\IRPCMethod.cs" />
+    <Compile Include="Methods\removeTicket.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScriptRunner.cs" />

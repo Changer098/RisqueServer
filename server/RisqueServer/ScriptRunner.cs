@@ -5,6 +5,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.IO;
+using System.Security;
 
 namespace RisqueServer {
     /// <summary>
@@ -17,6 +18,9 @@ namespace RisqueServer {
         public static readonly string pyVerifyScriptLocationNix = @"";
         public static readonly string pyTestScriptLocationWin = @"C:\Users\everettr\Desktop\testy.py";
         public static readonly string pyTestScriptLocationNix = @"/home/ONEPURDUE/everettr/testy.py";
+
+        public static SecureString defaultUser;
+        public static SecureString defaultPassword;
 
         public enum ScriptType {
             Python,
