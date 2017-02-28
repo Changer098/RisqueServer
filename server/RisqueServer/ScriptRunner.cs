@@ -19,9 +19,6 @@ namespace RisqueServer {
         public static readonly string pyTestScriptLocationWin = @"C:\Users\everettr\Desktop\testy.py";
         public static readonly string pyTestScriptLocationNix = @"/home/ONEPURDUE/everettr/testy.py";
 
-        public static SecureString defaultUser;
-        public static SecureString defaultPassword;
-
         public enum ScriptType {
             Python,
             Ruby                //Hope to support
@@ -32,7 +29,6 @@ namespace RisqueServer {
             verifyScript,           //Script for verifying tickets
             testScript              //Simple test script
         }
-
 
         public static string pythonLoc { get {
                 if (Extensions.IsLinux) {

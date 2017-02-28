@@ -465,6 +465,7 @@ namespace RisqueServer.Tickets {
         }
         public int ticketCount { get; set; }
         public Dictionary<int, StoredDetails> tickets { get; set; }
+        public string userFile { get; set; }
         //public StoredDetails[] tickets { get; set; }
         public static TicketDirectory Deserialize(string text) {
             JObject jobj;
@@ -477,6 +478,7 @@ namespace RisqueServer.Tickets {
             }
 
             TicketDirectory direct = new TicketDirectory(jobj.Property("ticketCount").Value.ToObject<int>());
+            direct.userFile = jobj.Property("userFile").Value.ToObject<string>();
             foreach (JToken token in jobj.Property("tickets").Values()) {
                 //Create StoredDetail and add to Dictionary
                 //broken
