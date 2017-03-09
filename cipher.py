@@ -15,9 +15,9 @@ class Cipher:
     zeroPadder = None
 
     def __init__(self, newIv, newKey):
-        if len(iv) % 16 != 0 or len(iv) == 0:
+        if len(newIv) % 16 != 0 or len(newIv) == 0:
             raise ValueError("IV is an incorrect length: " + len(iv))
-        if len(key) % 16 != 0 or len(key) == 0:
+        if len(newKey) % 16 != 0 or len(newKey) == 0:
             raise ValueError("Key is an incorrect length: " + len(key))
         self.iv = newIv
         self.key = newKey
@@ -63,26 +63,3 @@ class ZeroPadder:
                 break;
             newArray.append(array[i])
         return newArray.decode("utf-8")
-
-
-#iv = "1234567890123456"
-#key = "key1234567897891"
-key = 'your key 16bytes'
-iv = '1234567812345678'
-
-cipher = Cipher(newIv=iv, newKey=key)
-
-encoded = cipher.encode("hello world")
-print "Encoded: " + encoded
-roundtrip = cipher.decode(encoded)
-print "Roundtrip: " + roundtrip
-
-longtext = "Lorem ipsum dolor sit salem illa idem eam"
-encoded = cipher.encode(longtext)
-print "Encoded: " + encoded
-roundtrip = cipher.decode(encoded)
-print "Roundtrip: " + roundtrip
-
-cipher = Cipher("1234567812345678", "your key 16bytes")
-fromSharp = "IMb+e5BoVMY1Pb+I5O3HK2GAJhlHURr5mWDT81KUo/w="
-print "fromSharp Decoded: " + cipher.decode(fromSharp)
