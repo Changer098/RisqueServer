@@ -10,8 +10,8 @@ namespace RisqueServer.Communication {
         SecureString defaultUser;
         SecureString defaultPass;
         
-        static void loadValues() {
-
+        public UserManager(string userFileLocation, SecurityManager manager) {
+            //Decode userFil with the Security Manager
         }
     }
 }

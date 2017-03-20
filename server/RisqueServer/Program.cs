@@ -19,12 +19,20 @@ namespace RisqueServer {
         Scheduler scheduler;
         
         static void Main(string[] args) {
+            string key = null, iv = null;
             Program p = new Program();
             parseArgs(p, args);
             if (p.config == null) {
                 Console.WriteLine("Failed to read config file");
                 return;
             }
+            //Read key and iv
+            Console.WriteLine("Enter Encryption key (base64)");
+            key = Console.ReadLine();
+            Console.WriteLine("Enter Encryption IV (base64)");
+            iv = Console.ReadLine();
+            Console.WriteLine();
+
             Debug.WriteLine("Creating logger");
             WebLogger logger = new WebLogger();
             //TODO Properly initialize
@@ -48,11 +56,13 @@ namespace RisqueServer {
         /// Parses Arguments
         /// </summary>
         /// <param name="prog"></param>
-        /// <param name="args"></param>
+        /// <param name="args"></param> 
+        
+        //ABSOLUTE MESS
         static void parseArgs(Program prog, string[] args) {
             Console.WriteLine("Args length: " + args.Length);
             ParsedConfigFile configFile = null;
-            string directLocation = null;
+            string directoryLocation = null, keyFileLoc = null, userFileLoc = null;
             bool markVerbose = false;
             for (int i = 0; i < args.Length; i++) {
                 if (args[i].Equals("-c", StringComparison.CurrentCultureIgnoreCase) ||
@@ -69,15 +79,39 @@ namespace RisqueServer {
                 }
                 else if (args[i].Equals("-t", StringComparison.CurrentCultureIgnoreCase) ||
                     args[i].Equals("--t", StringComparison.CurrentCultureIgnoreCase)) {
-                    //config file
-                    string directoryLocation = String.Empty;
+                    //directory location
+                    string directLocation = String.Empty;
                     try {
-                        directoryLocation = args[++i];   //get the string of the next argument
+                        directLocation = args[++i];   //get the string of the next argument
                     }
                     catch (Exception) {
                         Console.WriteLine("Failed to read ticket directory location");
                     }
-                    directLocation = directoryLocation;
+                    directoryLocation = directLocation;
+                }
+                else if (args[i].Equals("-k", StringComparison.CurrentCultureIgnoreCase) ||
+                    args[i].Equals("--k", StringComparison.CurrentCultureIgnoreCase)) {
+                    //Keyfile location
+                    string loc = String.Empty;
+                    try {
+                        loc = args[++i];   //get the string of the next argument
+                    }
+                    catch (Exception) {
+                        Console.WriteLine("Failed to read keyFile location");
+                    }
+                    keyFileLoc = loc;
+                }
+                else if (args[i].Equals("-u", StringComparison.CurrentCultureIgnoreCase) ||
+                    args[i].Equals("--u", StringComparison.CurrentCultureIgnoreCase)) {
+                    //Userfile location
+                    string loc = String.Empty;
+                    try {
+                        loc = args[++i];   //get the string of the next argument
+                    }
+                    catch (Exception) {
+                        Console.WriteLine("Failed to read userFile location");
+                    }
+                    userFileLoc = loc;
                 }
                 else if (args[i].Equals("-h", StringComparison.CurrentCultureIgnoreCase) ||
                     args[i].Equals("--h", StringComparison.CurrentCultureIgnoreCase)) {
@@ -91,17 +125,17 @@ namespace RisqueServer {
                 }
             }
             if (configFile != null) {
-                Console.WriteLine("configFile field is not null");
+                //Console.WriteLine("configFile field is not null");
                 prog.config = new ActiveConfig();
                 prog.config.hasConfig = true;
                 prog.config.port = configFile.port;
                 prog.config.portSecure = configFile.portSecure;
-                prog.config.ticketDirectory = directLocation;
+                prog.config.ticketDirectory = directoryLocation;
                 if (markVerbose) { prog.config.verbose = true; }
                 else { prog.config.verbose = configFile.verbose; }
             }
             else {
-                Console.WriteLine("configFile field is null");
+                //Console.WriteLine("configFile field is null");
                 prog.config = new ActiveConfig();
                 prog.config.hasConfig = false;
                 prog.config.port = 8181;
@@ -114,6 +148,8 @@ namespace RisqueServer {
             Console.WriteLine("-h --h \t Shows this Help Screen");
             Console.WriteLine("-c --c \t Supply the config file");
             Console.WriteLine("-v --v \t Enables verbose output");
+            Console.WriteLine("-u --u \t Supply the location to the UserFile");
+            Console.WriteLine("-k --k \t Supply the location to the keyFile");
         }
         static ParsedConfigFile parseConfig(string fileName) {
             ParsedConfigFile parsed;

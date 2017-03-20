@@ -9,12 +9,16 @@ namespace RisqueServer {
         public int portSecure { get; set; }
         public bool verbose { get; set; }
         public string ticketDirectory { get; set; }
+        public string keyFileLocation { get; set; }
+        public string userFileLocation { get; set; }
     }
     class ActiveConfig {
         public int port { get; set; }
         public int portSecure { get; set; }
         public bool verbose { get; set; }
         public string ticketDirectory { get; set; }
+        public string keyFileLocation { get; set; }
+        public string userFileLocation { get; set; }
         public bool hasConfig;
     }
 }
