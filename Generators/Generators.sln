@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "userFile", "userFileGenerator\userFile.csproj", "{B47BE93F-BB82-4982-A0A6-B7C79FF5C643}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "keyFileGenerator", "keyFileGenerator\keyFileGenerator.csproj", "{565DCE0C-AB98-4233-B97F-52605077EC02}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "keyFile", "keyFileGenerator\keyFile.csproj", "{565DCE0C-AB98-4233-B97F-52605077EC02}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{FFB0506A-E0F9-4858-840D-792730284177}"
 EndProject

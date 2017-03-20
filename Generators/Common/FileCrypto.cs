@@ -64,5 +64,33 @@ namespace Generators {
 
             return Convert.ToBase64String(ciph_bytes);
         }
+        public static void encryptKeyFile(string dest, string key, string iv, string plaintext) {
+            var textEncoder = new UTF8Encoding();
+
+            var aes = new AesManaged();
+            aes.Key = Convert.FromBase64String(key);
+            aes.IV = Convert.FromBase64String(iv);
+            aes.Padding = PaddingMode.Zeros;
+            aes.Mode = CipherMode.CBC;
+
+            var encryptor = aes.CreateEncryptor();
+            var cipher = textEncoder.GetBytes(plaintext);
+            var ciph_bytes = encryptor.TransformFinalBlock(cipher, 0, cipher.Length);
+            string asBase64 = Convert.ToBase64String(ciph_bytes);
+            byte[] fromBase64 = textEncoder.GetBytes(asBase64);
+
+            FileStream ciphWriter = File.Create(dest);
+            ciphWriter.Write(fromBase64, 0, fromBase64.Length);
+            ciphWriter.Flush();
+            int f = 5;
+        }
+        public static string randomBase64() {
+            RandomNumberGenerator generator = RandomNumberGenerator.Create();
+            byte[] bytes = new byte[16];
+            for (int i = 0; i < 128; i++) {
+                generator.GetBytes(bytes);
+            }
+            return Convert.ToBase64String(bytes);
+        }
     }
 }
