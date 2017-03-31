@@ -67,7 +67,8 @@
   <ItemGroup>
     <Compile Include="Communication\ComMessages.cs" />
     <Compile Include="Communication\Mailer.cs" />
-    <Compile Include="Communication\UserManager.cs" />
+    <Compile Include="Security\SecurityManager.cs" />
+    <Compile Include="Security\UserManager.cs" />
     <Compile Include="ConfigFile.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Methods\addTicketInfo.cs" />
@@ -85,6 +86,7 @@
     <Compile Include="Scheduler.cs" />
     <Compile Include="Communication\ServiceFactory.cs" />
     <Compile Include="Communication\SockHandler.cs" />
+    <Compile Include="Tests\RandomValueTest.cs" />
     <Compile Include="Tests\TestDateSort.cs" />
     <Compile Include="Tests\TestHeaderSeperation.cs" />
     <Compile Include="Tests\TestListSort.cs" />

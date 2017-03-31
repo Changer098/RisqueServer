@@ -17,7 +17,7 @@ namespace RisqueServer.Tickets {
         TicketDirectory ticketDirectory = null;
         Dictionary<int, Tuple<Ticket, TicketStatus>> tickets = null;
         Scheduler scheduler = null;
-        string folderRoot = null;
+        public static string folderRoot = null;
         Thread WorkerThread;
         int workerRefreshMinutes = 1;         //How often should IOWorker check for updates
         bool addedTicket = false, removedTicket = false;
@@ -60,7 +60,7 @@ namespace RisqueServer.Tickets {
                     throw new Exception("Attempted to create TicketStorage with an invalid path");
                 }
                 else {
-                    this.folderRoot = path;
+                    TicketStorage.folderRoot = path;
                     using (StreamReader reader = new StreamReader(fileDirectory)) {
                         //this.ticketDirectory = JsonConvert.DeserializeObject<TicketDirectory>(reader.ReadToEnd());
                         string readToEnd = reader.ReadToEnd();
@@ -78,7 +78,7 @@ namespace RisqueServer.Tickets {
             else {
                 //create path
                 Console.WriteLine("Directory does not exist, path=" + path);
-                this.folderRoot = path;       
+                TicketStorage.folderRoot = path;       
                 if (Extensions.IsLinux) {
                     Console.WriteLine("Creating Directory at: {0}", System.Environment.CurrentDirectory + @"/Tickets");
                     Directory.CreateDirectory(System.Environment.CurrentDirectory + @"/Tickets");
@@ -156,7 +156,7 @@ namespace RisqueServer.Tickets {
                     i = i + 1;
                 }
                 Debug.WriteLine("Exited loop");
-                i = i;
+                //i = i;
                 return arr;
             }
             return null;
@@ -211,14 +211,22 @@ namespace RisqueServer.Tickets {
             }
         }
         public string getAbsoluteFileLocation(string path) {
-            return path.Replace("./", folderRoot);
+            string x = path.Replace("./", folderRoot);
+            if (!Extensions.IsLinux) {
+                // Don't use a forward slash, convert to backslash
+                x = x.Replace('/', '\\');
+            }
+            return x;
         }
         public string getAbsoluteFolderLocation(string path) {
+            string x;
             if (Extensions.IsLinux) {
-                return getAbsoluteFileLocation(path) + '/';
+                x =  getAbsoluteFileLocation(path) + '/';
+                return x.Replace('\\', '/');
             }
             else {
-                return getAbsoluteFileLocation(path) + '\\';
+                x = getAbsoluteFileLocation(path) + '\\';
+                return x.Replace('/', '\\');
             }
         }
         /// <summary>
@@ -465,7 +473,6 @@ namespace RisqueServer.Tickets {
         }
         public int ticketCount { get; set; }
         public Dictionary<int, StoredDetails> tickets { get; set; }
-        public string userFile { get; set; }
         //public StoredDetails[] tickets { get; set; }
         public static TicketDirectory Deserialize(string text) {
             JObject jobj;
@@ -478,7 +485,6 @@ namespace RisqueServer.Tickets {
             }
 
             TicketDirectory direct = new TicketDirectory(jobj.Property("ticketCount").Value.ToObject<int>());
-            direct.userFile = jobj.Property("userFile").Value.ToObject<string>();
             foreach (JToken token in jobj.Property("tickets").Values()) {
                 //Create StoredDetail and add to Dictionary
                 //broken

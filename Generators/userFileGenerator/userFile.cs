@@ -52,6 +52,12 @@ namespace userFileGenerator {
             string keyFilePass = ConsoleExtend.ReadPassword();
             Console.Write("Key File IV: ");
             string keyFileIV = Console.ReadLine();
+            Console.WriteLine("Are Password/IV Base64? (y/n): ");
+            string base64Response = Console.ReadLine();
+            if (base64Response.Trim()[0] != 'y') {
+                keyFilePass = Convert.ToBase64String(Encoding.UTF8.GetBytes(keyFilePass));
+                keyFileIV = Convert.ToBase64String(Encoding.UTF8.GetBytes(keyFileIV));
+            }
             //Try and decrypt the keyFile
 
             string[] keyFileText = FileCrypto.decryptFile(keyFilePath, keyFilePass, keyFileIV);
@@ -67,17 +73,35 @@ namespace userFileGenerator {
                     continue;
                 if (keyFileText[i].Contains("iv=")) {
                     string[] split = keyFileText[i].Split('=');
-                    IV = split[1];
+                    string fixIV = string.Empty;
+                    for (int x = 1; x < split.Length; x++) {
+                        if (split[x] == "") {
+                            fixIV = fixIV + '=';
+                        }
+                        else {
+                            fixIV = fixIV + split[x];
+                        }
+                    }
+                    IV = fixIV;
                     continue;
                 }
                 else if (keyFileText[i].Contains("key=")) {
                     string[] split = keyFileText[i].Split('=');
-                    KEY = split[1];
+                    string fixKey = string.Empty;
+                    for (int x = 1; x < split.Length; x++) {
+                        if (split[x] == "") {
+                            fixKey = fixKey + '=';
+                        }
+                        else {
+                            fixKey = fixKey + split[x];
+                        }
+                    }
+                    KEY = fixKey;
                     continue;
                 }
             }
-            //Console.WriteLine("Key: {0}", KEY);
-            //Console.WriteLine("IV: {0}", IV);
+            Console.WriteLine("Key: {0}", KEY);
+            Console.WriteLine("IV: {0}", IV);
 
             Console.WriteLine("Creating a new userFile");
             Console.Write("Username: ");

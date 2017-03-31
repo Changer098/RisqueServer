@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 
 namespace Generators {
     public class FileCrypto {
+        //key and iv should be base64
         public static string[] decryptFile(string path, string key, string iv) {
             string ciphtext = File.ReadAllText(path);                                                   //Read from file
             string plaintext = decryptString(ciphtext, key, iv);                                        //Decrypt string
@@ -28,12 +29,13 @@ namespace Generators {
             }
             return true;
         }
+        //key and IV should be base64
         public static string decryptString(string ciphtext, string key, string iv) {
             var textEncoder = new UTF8Encoding();
 
             var aes = new AesManaged();
-            aes.Key = textEncoder.GetBytes(key);
-            aes.IV = textEncoder.GetBytes(iv);
+            aes.Key = Convert.FromBase64String(key);
+            aes.IV = Convert.FromBase64String(iv);
             aes.Padding = PaddingMode.Zeros;
             aes.Mode = CipherMode.CBC;
 
@@ -45,16 +47,19 @@ namespace Generators {
             //Console.WriteLine(text);
             return text;
         }
+        //key and IV should be base64
         public static string encryptData(string username, string email, string pass, string key, string iv) {
-            string plaintext = String.Format("username={0}", username) + '\n' 
+            string plaintext = "######BEGIN USER FILE######" + '\n';
+            plaintext += String.Format("username={0}", username) + '\n' 
                 + String.Format("email={0}", email) + '\n' 
-                + String.Format("pass={0}", pass);
+                + String.Format("pass={0}", pass) + '\n';
+            plaintext += "######END USER FILE######";
 
             var textEncoder = new UTF8Encoding();
 
             var aes = new AesManaged();
-            aes.Key = textEncoder.GetBytes(key);
-            aes.IV = textEncoder.GetBytes(iv);
+            aes.Key = Convert.FromBase64String(key);
+            aes.IV = Convert.FromBase64String(iv);
             aes.Padding = PaddingMode.Zeros;
             aes.Mode = CipherMode.CBC;
 
@@ -82,7 +87,6 @@ namespace Generators {
             FileStream ciphWriter = File.Create(dest);
             ciphWriter.Write(fromBase64, 0, fromBase64.Length);
             ciphWriter.Flush();
-            int f = 5;
         }
         public static string randomBase64() {
             RandomNumberGenerator generator = RandomNumberGenerator.Create();

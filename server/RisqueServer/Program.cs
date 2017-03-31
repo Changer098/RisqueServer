@@ -7,6 +7,7 @@ using System.Diagnostics;
 using WebSockets;
 using RisqueServer.Communication;
 using RisqueServer.Methods;
+using RisqueServer.Security;
 
 //https://www.codeproject.com/articles/57060/web-socket-server Reference
 
@@ -17,6 +18,7 @@ namespace RisqueServer {
         MethodMan methodMan;
         Tickets.TicketStorage ticketStorage;
         Scheduler scheduler;
+        SecurityManager securityMan;
         
         static void Main(string[] args) {
             string key = null, iv = null;
@@ -32,6 +34,7 @@ namespace RisqueServer {
             Console.WriteLine("Enter Encryption IV (base64)");
             iv = Console.ReadLine();
             Console.WriteLine();
+            p.securityMan = new SecurityManager(p.config.keyFileLocation, key, iv, p.config.userFileLocation);
 
             Debug.WriteLine("Creating logger");
             WebLogger logger = new WebLogger();
@@ -41,7 +44,7 @@ namespace RisqueServer {
             else p.ticketStorage = new Tickets.TicketStorage();
             //TODO Properly initalize
             Debug.WriteLine("Creating Scheduler");
-            p.scheduler = new Scheduler(p.ticketStorage);
+            p.scheduler = new Scheduler(p.ticketStorage, p.securityMan);
             Debug.WriteLine("Creating Method Manager");
             p.methodMan = new MethodMan(p.ticketStorage, p.scheduler);
             Debug.WriteLine("Creating Service Factory");
@@ -130,7 +133,29 @@ namespace RisqueServer {
                 prog.config.hasConfig = true;
                 prog.config.port = configFile.port;
                 prog.config.portSecure = configFile.portSecure;
-                prog.config.ticketDirectory = directoryLocation;
+                if (directoryLocation != null) {
+                    //use supplied Ticket Directory instead of the one in the config
+                    prog.config.ticketDirectory = directoryLocation;
+                }
+                else {
+                    prog.config.ticketDirectory = configFile.ticketDirectory;
+                }
+                if (keyFileLoc != null) {
+                    //use supplied Key File instead of the one in the config
+                    prog.config.keyFileLocation = keyFileLoc;
+                }
+                else {
+                    prog.config.keyFileLocation = configFile.keyFileLocation;
+                }
+                if (userFileLoc != null) {
+                    //use supplied User File instead of the one in the config
+                    prog.config.userFileLocation = userFileLoc;
+                }
+                else {
+                    prog.config.userFileLocation = configFile.userFileLocation;
+                }
+                
+                prog.config.verbose = configFile.verbose | markVerbose; //If either is true, equal to true
                 if (markVerbose) { prog.config.verbose = true; }
                 else { prog.config.verbose = configFile.verbose; }
             }
@@ -141,6 +166,8 @@ namespace RisqueServer {
                 prog.config.port = 8181;
                 prog.config.portSecure = 401;
                 prog.config.ticketDirectory = null;
+                prog.config.keyFileLocation = keyFileLoc;
+                prog.config.userFileLocation = userFileLoc;
             }
             Console.WriteLine("Parsed args");
         }

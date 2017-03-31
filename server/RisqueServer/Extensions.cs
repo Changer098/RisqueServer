@@ -62,5 +62,14 @@ namespace RisqueServer {
                 return (p == 4) || (p == 6) || (p == 128);
             }
         }
+        public static int CountChar (this string s, char c) {
+            int count = 0;
+            for (int i = 0; i < s.Length; i++) {
+                if (s[i] == c) {
+                    count = count + 1;
+                }
+            }
+            return count;
+        }
     }
 }

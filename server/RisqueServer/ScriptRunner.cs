@@ -103,23 +103,34 @@ namespace RisqueServer {
                 }).Start();
             }   
         }*/
-        public static void modifyTicket(int TicketId, Scheduler sched) {
+        public static void modifyTicket(int TicketId, Scheduler sched, Security.SecurityManager manager) {
             //try and get job location
             string ticketLocation = sched.getTicketLocation(TicketId);
             ProcessStartInfo start = new ProcessStartInfo();
             start.FileName = pythonLoc;
             start.UseShellExecute = false;
             start.RedirectStandardOutput = true;
+            //get userFile Location and generate random crypto info
+            string randKey = Security.SecurityManager.randomCrypto();
+            string randIV = Security.SecurityManager.randomCrypto();
+            //Just use the default manager for now
+            string userFileLocation = manager.getUserFileLocation("default", randKey, randIV);
             //CHANGE IN PRODUCTION
             //start.Arguments = String.Format("{0} {1}", scriptLoc(RunnableScript.modifyScript), ticketLocation);
-            start.Arguments = String.Format("{0} {1}", scriptLoc(RunnableScript.testScript), ticketLocation);
+            start.Arguments = String.Format("{0} {1} {2} {3} {4}", 
+                scriptLoc(RunnableScript.testScript),
+                ticketLocation, 
+                userFileLocation,
+                randKey,
+                randIV);
             try {
                 Process process = Process.Start(start);
                 using (StreamReader reader = process.StandardOutput) {
                     string result = reader.ReadToEnd();
                     Console.Write(result);
-                    sched.completeTicket(TicketId);
                 }
+                sched.completeTicket(TicketId);
+                manager.destroyUserFile(userFileLocation);
             }
             catch (Exception e) {
                 string messsage = e.Message;

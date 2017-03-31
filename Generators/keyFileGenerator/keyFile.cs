@@ -212,7 +212,7 @@ namespace keyFileGenerator {
             Console.WriteLine("Key: {0}", keyDATA);
             Console.WriteLine("IV: {0}", ivDATA);
             Console.WriteLine("Successfully created keyFile at {0}", destpath);
-            //Console.ReadLine();
+            Console.ReadLine();
         }
 
         public static string formKeyFile(string key, string iv) {

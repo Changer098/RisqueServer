@@ -1,6 +1,0 @@
-/*Configuration changes to this JSON formatted need to be committed in ConfigFile.cs*/
-{
-	"port" : 8181,
-	"portSecure" : 443,
-	"verbose" : true
-}

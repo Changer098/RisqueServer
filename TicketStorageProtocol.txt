@@ -36,7 +36,7 @@ TicketStorage protocol
 		
 	status.json	//For misc. server details
 		//Allow for custom SSH credientials
-		//Values: "Default" (System stored credientials), Actual user name
+		//Values: "default" (System stored credentials), Actual user name
 		//CASE SENSITIVE
 		"user" : string,
 		"completed" : boolean

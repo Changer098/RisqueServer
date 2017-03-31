@@ -11,18 +11,20 @@ namespace RisqueServer {
     public class Scheduler {
         //Compiler complains but loadTickets() initalizes it
         public TicketList scheduledTickets = null;
-        DateTime StartTime;     //5:30PM
-        DateTime EndTime;       //11:55PM
-        TicketStorage storage;
+        private DateTime StartTime;     //5:30PM
+        private DateTime EndTime;       //11:55PM
+        private TicketStorage storage;
+        private Security.SecurityManager securityManager;
         //Queue<T> immediateQueue
-        Thread mainSchedule;
+        private Thread mainSchedule;
         private readonly object _lockObject = new object();
-        public Scheduler(TicketStorage storage) {  
+        public Scheduler(TicketStorage storage, Security.SecurityManager securityManager) {  
             StartTime = new DateTime(1, 1, 1, 8, 0, 0);
             EndTime = new DateTime(1, 1, 1, 19, 0, 0);
             mainSchedule = new Thread(loop);
             this.storage = storage;
             this.storage.registerScheduler(this);
+            this.securityManager = securityManager;
             loadTickets();
             mainSchedule.Start();
         }
@@ -56,19 +58,28 @@ namespace RisqueServer {
                             //do work
                             Ticket toExecute = (scheduledTickets[0] as Ticket);
                             //Console.WriteLine("Executing Ticket: {0}", toExecute.ticketID);
-                            ScriptRunner.modifyTicket((scheduledTickets[0] as Ticket).ticketID, this);
+                            ScriptRunner.modifyTicket((scheduledTickets[0] as Ticket).ticketID, this, this.securityManager);
                             //completeTicket((scheduledTickets[0] as Ticket).ticketID);
                             continue;
                         }
                         else {
-                            //Calculate how long to wait until ticket is ready
-                            int hours, minutes;
                             Ticket nextTicket = (Ticket)scheduledTickets[0];
-                            hours = DateTime.Now.Hour - nextTicket.date.Hour;
-                            minutes = DateTime.Now.Minute - nextTicket.date.Minute;
-                            TimeSpan actual = new TimeSpan(Math.Abs(hours), Math.Abs(minutes), 0);
-                            sleepTime = actual;
-                            //Console.WriteLine("Sleeping for {0} minutes", sleepTime.Minutes);
+                            //Check if the same day
+                            if (nextTicket.date.DayOfYear != DateTime.Now.DayOfYear || nextTicket.date.Year != DateTime.Now.Year) {
+                                //Default sleep time
+                                TimeSpan actual = new TimeSpan(1, 0, 0);
+                                sleepTime = actual;
+                            }
+                            else {
+                                //Calculate how long to wait
+                                int hours, minutes;
+                                hours = DateTime.Now.Hour - nextTicket.date.Hour;
+                                minutes = DateTime.Now.Minute - nextTicket.date.Minute;
+                                TimeSpan actual = new TimeSpan(Math.Abs(hours), Math.Abs(minutes), 0);
+                                sleepTime = actual;
+                                //Console.WriteLine("Sleeping for {0} minutes", sleepTime.Minutes);
+                            }
+
                         }
                     }
                     else {
@@ -198,7 +209,7 @@ namespace RisqueServer {
                 }
             }
             else if (scheduledTickets.count != 0) {
-                scheduledTickets = scheduledTickets;
+                //scheduledTickets = scheduledTickets;
                 if (tick.dueBy.fromRisqueTime() < (scheduledTickets[scheduledTickets.count - 1] as Ticket).dueBy.fromRisqueTime()) {
                     scheduledTickets.Add(tick);
                     Console.WriteLine("Added Ticket");
