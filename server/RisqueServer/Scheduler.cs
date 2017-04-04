@@ -39,6 +39,7 @@ namespace RisqueServer {
         }
         public void completeTicket(int tickedId) {
             storage.completeTicket(tickedId);
+            securityManager.sendCompletion(tickedId, null);
             this.scheduledTickets.Remove(tickedId);
         }
         private void loop() {

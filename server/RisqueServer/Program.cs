@@ -1,4 +1,7 @@
-﻿using System;
+﻿//nohup
+
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,7 +37,7 @@ namespace RisqueServer {
             Console.WriteLine("Enter Encryption IV (base64)");
             iv = Console.ReadLine();
             Console.WriteLine();
-            p.securityMan = new SecurityManager(p.config.keyFileLocation, key, iv, p.config.userFileLocation);
+            p.securityMan = new SecurityManager(p.config.keyFileLocation, key, iv, p.config.userFileLocation, p.config.emailUserFileLocation);
 
             Debug.WriteLine("Creating logger");
             WebLogger logger = new WebLogger();
@@ -154,7 +157,8 @@ namespace RisqueServer {
                 else {
                     prog.config.userFileLocation = configFile.userFileLocation;
                 }
-                
+
+                prog.config.emailUserFileLocation = configFile.emailUserFileLocation;
                 prog.config.verbose = configFile.verbose | markVerbose; //If either is true, equal to true
                 if (markVerbose) { prog.config.verbose = true; }
                 else { prog.config.verbose = configFile.verbose; }
@@ -168,6 +172,7 @@ namespace RisqueServer {
                 prog.config.ticketDirectory = null;
                 prog.config.keyFileLocation = keyFileLoc;
                 prog.config.userFileLocation = userFileLoc;
+                prog.config.emailUserFileLocation = null;
             }
             Console.WriteLine("Parsed args");
         }

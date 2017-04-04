@@ -11,6 +11,7 @@ namespace RisqueServer {
         public string ticketDirectory { get; set; }
         public string keyFileLocation { get; set; }
         public string userFileLocation { get; set; }
+        public string emailUserFileLocation { get; set; }                   //Uses same keyFile
     }
     class ActiveConfig {
         public int port { get; set; }
@@ -19,6 +20,7 @@ namespace RisqueServer {
         public string ticketDirectory { get; set; }
         public string keyFileLocation { get; set; }
         public string userFileLocation { get; set; }
+        public string emailUserFileLocation { get; set; }                   //Uses same keyFile
         public bool hasConfig;
     }
 }

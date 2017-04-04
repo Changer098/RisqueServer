@@ -1,0 +1,10 @@
+/*Configuration changes to this JSON formatted need to be committed in ConfigFile.cs*/
+{
+	"port" : 8181,
+	"portSecure" : 443,
+	"verbose" : true,
+	"ticketDirectory" : "C:\\Users\\everettr\\Documents\\Repositories\\RisqueServer\\TicketsDir",
+	"keyFileLocation" : "C:\\Users\\everettr\\Documents\\Repositories\\RisqueServer\\TicketsDir\\serverKey.dat",
+	"userFileLocation" : "C:\\Users\\everettr\\Documents\\Repositories\\RisqueServer\\TicketsDir\\testuser.dat",
+	"emailUserFileLocation" : "C:\\Users\\everettr\\Documents\\Repositories\\RisqueServer\\TicketsDir\\everMailer.dat"
+}

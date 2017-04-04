@@ -31,7 +31,7 @@ namespace RisqueServer.Security {
             }
         }
     }
-    class User {
+    public class User {
         private string name = null;             //Leave unencrypted for now
         private string pass = null;             //Leave unencrypted for now
         private string email = null;            //Leave unencrypted for now
@@ -61,6 +61,27 @@ namespace RisqueServer.Security {
                 return userBuilder.ToString();
             }
             return null;
+        }
+        public static User parseUserFile(string[] userFileLines, out int securityValue) {
+            if (SecurityManager.isValidUserFile(userFileLines)) {
+                string name = null, email = null, pass = null;
+                foreach (string line in userFileLines) {
+                    string[] split = line.Split('=');
+                    if (split[0].Trim() == "username") {
+                        name = split[1].Trim();
+                    }
+                    else if (split[0].Trim() == "email") {
+                        email = split[1].Trim();
+                    }
+                    else if (split[0].Trim() == "pass") {
+                        pass = split[1].Trim();
+                    }
+                }
+                return new User(name, pass, email, out securityValue);
+            }
+            else {
+                throw new Exception("Not a valid UserFile!");
+            }
         }
 
         /// <summary>

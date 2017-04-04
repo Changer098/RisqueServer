@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Security.Cryptography;
+using RisqueServer.Communication;
 
 namespace RisqueServer.Security {
     public class SecurityManager {
@@ -13,6 +14,7 @@ namespace RisqueServer.Security {
         private AesManaged aes = null;
         private UTF8Encoding encoder = new UTF8Encoding();
         private UserManager userManager = null;
+        private Mailer mailer = null;
 
         /// <summary>
         /// Initializes the Security Manager by attempting to decrypt the keyFile
@@ -20,10 +22,12 @@ namespace RisqueServer.Security {
         /// <param name="keyFileLocation">Location of the keyFile</param>
         /// <param name="key">supplied encryption key (Base64) given at program start</param>
         /// <param name="iv">supplied encryption iv (Base64) given at program start</param>
+        /// <param name="userFileLocation">Location of the userFile encrypted by keyFile</param>
+        /// <param name="emailUserFileLocation">Location of the userFile for the email sender, also encrypted by keyFile</param>
         /// <exception cref="DecryptionException">Throws if @keyFileLocation cannot be decrypted</exception>
         /// <exception cref="IOException">Throws if @keyFileLocation cannot be read</exception>
-        public SecurityManager(string keyFileLocation, string key, string iv, string userFileLocation) {
-            if (key == null || iv == null || keyFileLocation == null || userFileLocation == null) {
+        public SecurityManager(string keyFileLocation, string key, string iv, string userFileLocation, string emailUserFileLocation) {
+            if (key == null || iv == null || keyFileLocation == null || userFileLocation == null || emailUserFileLocation == null) {
                 throw new ArgumentNullException();
             }
 
@@ -91,6 +95,8 @@ namespace RisqueServer.Security {
                     throw new Exception("Either Decrypted an invalid keyfile or supplied key/iv is wrong");
                 }
                 keyLines = null;                    //Destroy
+                aes.IV = Convert.FromBase64String(this.iv);
+                aes.Key = Convert.FromBase64String(this.key);
                 this.aes = aes;                     //store AES Object
                 this.aes.IV = Convert.FromBase64String(this.iv);
                 this.aes.Key = Convert.FromBase64String(this.key);
@@ -99,7 +105,7 @@ namespace RisqueServer.Security {
                 string[] userLines;
                 try {
                     string userFileENC = File.ReadAllText(userFileLocation);
-                    var decryptor = aes.CreateDecryptor();
+                    var decryptor = this.aes.CreateDecryptor();
                     var cipher = Convert.FromBase64String(userFileENC);
                     string plaintext = encoder.GetString(decryptor.TransformFinalBlock(cipher, 0, cipher.Length));
                     userLines = plaintext.Split('\n');
@@ -109,7 +115,20 @@ namespace RisqueServer.Security {
                 catch {
                     throw new DecryptionException();
                 }
-                if (isValidUserFile(userLines)) {
+                try {
+                    int securityValue = -1;
+                    User defaultUser = User.parseUserFile(userLines, out securityValue);
+                    this.userManager = new UserManager(defaultUser, securityValue, this);
+                    keyLines = null;
+
+                    /*User defaultUser = new User(name, pass, email, out securityValue);
+                    this.userManager = new UserManager(defaultUser, securityValue, this);*/
+                }
+                catch {
+                    throw new Exception("Either Decrypted an invalid userFile or keyFile contains incorrect key/iv");
+                }
+
+                /*if (isValidUserFile(userLines)) {
                     string name = null, email = null, pass = null;
                     foreach (string line in userLines) {
                         string[] split = line.Split('=');
@@ -137,7 +156,54 @@ namespace RisqueServer.Security {
                 }
                 else {
                     throw new Exception("Either Decrypted an invalid userFile or keyFile contains incorrect key/iv");
+                }*/
+                //Create the mailer Object
+                //read userFile
+                string[] emailLines;
+                try {
+                    string emailENC = File.ReadAllText(emailUserFileLocation);
+                    var decryptor = this.aes.CreateDecryptor();
+                    var cipher = Convert.FromBase64String(emailENC);
+                    string plaintext = encoder.GetString(decryptor.TransformFinalBlock(cipher, 0, cipher.Length));
+                    emailLines = plaintext.Split('\n');
+                    plaintext = null;
+                    emailENC = null;
                 }
+                catch {
+                    throw new DecryptionException();
+                }
+                int mailSecValue = -1;
+                User mailUser = User.parseUserFile(emailLines, out mailSecValue);
+                /*if (isValidUserFile(emailLines)) {
+                    string name = null, email = null, pass = null;
+                    foreach (string line in userLines) {
+                        string[] split = line.Split('=');
+                        if (split[0].Trim() == "username") {
+                            name = split[1].Trim();
+                        }
+                        else if (split[0].Trim() == "email") {
+                            email = split[1].Trim();
+                        }
+                        else if (split[0].Trim() == "pass") {
+                            pass = split[1].Trim();
+                        }
+                    }
+                    int securityValue = 0;
+                    User defaultUser = new User(name, pass, email, out securityValue);
+                    this.userManager = new UserManager(defaultUser, securityValue, this);
+
+                    //Try and destroy any remaining data
+                    name = null;
+                    email = null;
+                    pass = null;
+                    securityValue = int.MinValue;
+                    keyLines = null;
+                    keyFileENC = null;
+                }*/
+                //destroy sensitive info
+                emailLines = null;
+
+                this.mailer = new Mailer(mailUser, mailSecValue);
             }
             else {
                 throw new DecryptionException();
@@ -190,6 +256,10 @@ namespace RisqueServer.Security {
             File.WriteAllBytes(userFileLoc, zeroes);
             File.Delete(userFileLoc);
         }
+        //Just a caller function for Mailer.sendCompletion
+        public void sendCompletion(int ticketId, string ticketLocation) {
+            this.mailer.sendCompletion(ticketId, ticketLocation);
+        }
 
         /// <summary>
         /// Determines if string is a Valid AES length
@@ -217,7 +287,7 @@ namespace RisqueServer.Security {
             return true;
         }
         //Determine if a userFile is Valid or not
-        private bool isValidUserFile(string[] data) {
+        public static bool isValidUserFile(string[] data) {
             if (data[0].Trim() != "######BEGIN USER FILE######") {
                 return false;
             }
