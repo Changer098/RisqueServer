@@ -21,6 +21,8 @@ namespace RisqueServer {
         public string keyFileLocation { get; set; }
         public string userFileLocation { get; set; }
         public string emailUserFileLocation { get; set; }                   //Uses same keyFile
+        public string key { get; set; }
+        public string iv { get; set; }
         public bool hasConfig;
     }
 }

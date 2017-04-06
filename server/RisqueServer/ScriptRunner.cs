@@ -129,7 +129,7 @@ namespace RisqueServer {
                     string result = reader.ReadToEnd();
                     Console.Write(result);
                 }
-                sched.completeTicket(TicketId);
+                sched.completeTicket(TicketId, ticketLocation);
                 manager.destroyUserFile(userFileLocation);
             }
             catch (Exception e) {

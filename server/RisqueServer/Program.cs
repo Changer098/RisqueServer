@@ -1,5 +1,4 @@
-﻿//nohup
-
+﻿#define UNIX
 
 using System;
 using System.Collections.Generic;
@@ -12,6 +11,12 @@ using RisqueServer.Communication;
 using RisqueServer.Methods;
 using RisqueServer.Security;
 
+#if UNIX
+    using Mono.Unix;
+#else
+    
+#endif
+
 //https://www.codeproject.com/articles/57060/web-socket-server Reference
 
 namespace RisqueServer {
@@ -22,22 +27,32 @@ namespace RisqueServer {
         Tickets.TicketStorage ticketStorage;
         Scheduler scheduler;
         SecurityManager securityMan;
-        
+        WebServer server;
+        public delegate void OnShutdown();
+
         static void Main(string[] args) {
-            string key = null, iv = null;
+#if UNIX
+            Console.WriteLine("Hello unix");
+#else
+            Console.WriteLine("Hello WIN");
+#endif
             Program p = new Program();
             parseArgs(p, args);
             if (p.config == null) {
                 Console.WriteLine("Failed to read config file");
                 return;
             }
+            if (p.config.key == null || p.config.iv == null) {
+                Console.WriteLine("Key or IV not supplied. Can't start");
+                return;
+            }
             //Read key and iv
-            Console.WriteLine("Enter Encryption key (base64)");
+            /*Console.WriteLine("Enter Encryption key (base64)");
             key = Console.ReadLine();
             Console.WriteLine("Enter Encryption IV (base64)");
-            iv = Console.ReadLine();
+            iv = Console.ReadLine();*/
             Console.WriteLine();
-            p.securityMan = new SecurityManager(p.config.keyFileLocation, key, iv, p.config.userFileLocation, p.config.emailUserFileLocation);
+            p.securityMan = new SecurityManager(p.config.keyFileLocation, p.config.key, p.config.iv, p.config.userFileLocation, p.config.emailUserFileLocation);
 
             Debug.WriteLine("Creating logger");
             WebLogger logger = new WebLogger();
@@ -53,22 +68,41 @@ namespace RisqueServer {
             Debug.WriteLine("Creating Service Factory");
             ServiceFactory service = new ServiceFactory(logger, p.methodMan);
             Debug.WriteLine("Creating Web Server");
-            WebServer server = new WebServer(service, logger);
-            server.Listen(p.config.port);
+            p.server = new WebServer(service, logger);
+            p.server.Listen(p.config.port);
             Debug.WriteLine("Main() is listening");
+            p.securityMan.sendStartup();
+#if UNIX
+            // Catch SIGINT and SIGUSR1
+            UnixSignal[] signals = new UnixSignal[] {
+                new UnixSignal (Mono.Unix.Native.Signum.SIGINT),
+                new UnixSignal (Mono.Unix.Native.Signum.SIGUSR1),
+                new UnixSignal (Mono.Unix.Native.Signum.SIGQUIT),
+                new UnixSignal (Mono.Unix.Native.Signum.SIGTERM),
+            };
+            while (true) {
+                int index = UnixSignal.WaitAny(signals, -1);
+                p.server.Dispose();
+                Mono.Unix.Native.Signum signal = signals[index].Signum;
+                //Stop listening and close threads
+                p.securityMan.sendShutdown("Recieved kill signal");
+                Environment.Exit(0);
+            }
+#else
             Console.ReadKey();
+#endif
         }
         /// <summary>
         /// Parses Arguments
         /// </summary>
         /// <param name="prog"></param>
         /// <param name="args"></param> 
-        
+
         //ABSOLUTE MESS
         static void parseArgs(Program prog, string[] args) {
             Console.WriteLine("Args length: " + args.Length);
             ParsedConfigFile configFile = null;
-            string directoryLocation = null, keyFileLoc = null, userFileLoc = null;
+            string directoryLocation = null, keyFileLoc = null, userFileLoc = null, encKey = null, encIv = null;
             bool markVerbose = false;
             for (int i = 0; i < args.Length; i++) {
                 if (args[i].Equals("-c", StringComparison.CurrentCultureIgnoreCase) ||
@@ -129,6 +163,30 @@ namespace RisqueServer {
                     //verbose output. OVERRIDES CONFIG Settings
                     markVerbose = true;
                 }
+                else if (args[i].Equals("-ek", StringComparison.CurrentCultureIgnoreCase) ||
+                    args[i].Equals("--ek", StringComparison.CurrentCultureIgnoreCase)) {
+                    //supplies the encryption key
+                    string retrKey = String.Empty;
+                    try {
+                        retrKey = args[++i];   //get the string of the next argument
+                    }
+                    catch (Exception) {
+                        Console.WriteLine("Failed to read encryption key");
+                    }
+                    encKey = retrKey;
+                }
+                else if (args[i].Equals("-ei", StringComparison.CurrentCultureIgnoreCase) ||
+                    args[i].Equals("--ei", StringComparison.CurrentCultureIgnoreCase)) {
+                    //supplies the encryption iv
+                    string retrIv = String.Empty;
+                    try {
+                        retrIv = args[++i];   //get the string of the next argument
+                    }
+                    catch (Exception) {
+                        Console.WriteLine("Failed to read encryption key");
+                    }
+                    encIv = retrIv;
+                }
             }
             if (configFile != null) {
                 //Console.WriteLine("configFile field is not null");
@@ -162,6 +220,8 @@ namespace RisqueServer {
                 prog.config.verbose = configFile.verbose | markVerbose; //If either is true, equal to true
                 if (markVerbose) { prog.config.verbose = true; }
                 else { prog.config.verbose = configFile.verbose; }
+                prog.config.iv = encIv;
+                prog.config.key = encKey;
             }
             else {
                 //Console.WriteLine("configFile field is null");
@@ -173,6 +233,8 @@ namespace RisqueServer {
                 prog.config.keyFileLocation = keyFileLoc;
                 prog.config.userFileLocation = userFileLoc;
                 prog.config.emailUserFileLocation = null;
+                prog.config.iv = encIv;
+                prog.config.key = encKey;
             }
             Console.WriteLine("Parsed args");
         }
@@ -182,6 +244,8 @@ namespace RisqueServer {
             Console.WriteLine("-v --v \t Enables verbose output");
             Console.WriteLine("-u --u \t Supply the location to the UserFile");
             Console.WriteLine("-k --k \t Supply the location to the keyFile");
+            Console.WriteLine("-ek --ek \t Supply the keyFile's key");
+            Console.WriteLine("-ei --ei \t Supply the keyFile's iv");
         }
         static ParsedConfigFile parseConfig(string fileName) {
             ParsedConfigFile parsed;

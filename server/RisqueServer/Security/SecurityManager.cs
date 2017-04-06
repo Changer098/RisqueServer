@@ -260,6 +260,14 @@ namespace RisqueServer.Security {
         public void sendCompletion(int ticketId, string ticketLocation) {
             this.mailer.sendCompletion(ticketId, ticketLocation);
         }
+        //Just a caller function for Mailer.sendStartup
+        public void sendStartup() {
+            this.mailer.sendStartup();
+        }
+        //Just a caller function for Mailer.sendShutdown
+        public void sendShutdown(string shutdownReason) {
+            this.mailer.sendShutdown(shutdownReason);
+        }
 
         /// <summary>
         /// Determines if string is a Valid AES length
