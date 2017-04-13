@@ -28,6 +28,7 @@ namespace RisqueServer {
         Scheduler scheduler;
         SecurityManager securityMan;
         WebServer server;
+        ServiceServer serviceServer;
         public delegate void OnShutdown();
 
         static void Main(string[] args) {
@@ -72,6 +73,7 @@ namespace RisqueServer {
             p.server.Listen(p.config.port);
             Debug.WriteLine("Main() is listening");
             p.securityMan.sendStartup();
+            p.serviceServer = new ServiceServer(p.securityMan);
 #if UNIX
             // Catch SIGINT and SIGUSR1
             UnixSignal[] signals = new UnixSignal[] {

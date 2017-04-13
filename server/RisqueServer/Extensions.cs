@@ -71,5 +71,73 @@ namespace RisqueServer {
             }
             return count;
         }
+        public static DateTime decrement(this DateTime self) {
+            int days = self.Day;
+            int month = self.Month;
+            int year = self.Year;
+            days = days - 1;
+            if (days <= 0) {
+                //decrease month
+                month = month - 1;
+                if (month <= 0) {
+                    //decrease year
+                    year = year - 1;
+                    if (year <= 0) {
+                        return DateTime.MinValue;
+                    }
+                    month = 12;
+                    days = DaysInMonth(month, isLeapYear(year));
+                }
+                else {
+                    days = DaysInMonth(month, isLeapYear(year));
+                }
+            }
+            return new DateTime(year, month, days, self.Hour, self.Minute, self.Second);
+        }
+        public static int DaysInMonth(int month, bool isLeap) {
+            switch (month) {
+                case 2:
+                    if (isLeap) {
+                        return 28;
+                    }
+                    else {
+                        return 29;
+                    }
+                case 1:
+                case 3:
+                case 5:
+                case 7:
+                case 8:
+                case 10:
+                case 12:
+                    return 31;
+                case 4:
+                case 6:
+                case 9:
+                case 11:
+                    return 30;
+                default:
+                    return -1;
+            }
+        }
+        //https://support.microsoft.com/en-us/help/214019/method-to-determine-whether-a-year-is-a-leap-year
+        public static bool isLeapYear(int year) {
+            if (year % 4 == 0) {
+                if (year % 100 == 0) {
+                    if (year % 400 == 0) {
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                else {
+                    return true;
+                }
+            }
+            else {
+                return false;
+            }
+        }
     }
 }

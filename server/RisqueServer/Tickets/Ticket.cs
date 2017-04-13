@@ -32,6 +32,7 @@ namespace RisqueServer.Tickets {
         }*/
         public int ticketID { get; set; }
         public string dueBy { get; set; }
+        public bool isScheduled { get; set; }
         [JsonIgnore]
         public DateTime date;
         [OnDeserialized]

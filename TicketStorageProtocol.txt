@@ -13,7 +13,8 @@ TicketStorage protocol
 		
 	ticket.json Structure //Effectively same as RPC params
 		"id" : int,
-		"dueBy" : String
+		"dueBy" : String,
+		"isScheduled" : boolean,
 		"actions" : [
 			//Activate, Modify, Repair (Not Supported)
 			"portInfo" : {

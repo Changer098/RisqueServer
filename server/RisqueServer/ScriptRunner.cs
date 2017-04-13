@@ -13,11 +13,11 @@ namespace RisqueServer {
     /// </summary>
     public class ScriptRunner {
         public static readonly string pyModifyScriptLocationWin = @"";
-        public static readonly string pyModifyScriptLocationNix = @"";
+        public static readonly string pyModifyScriptLocationNix = @"/home/ONEPURDUE/everettr/risqueScripts/modify.py";
         public static readonly string pyVerifyScriptLocationWin = @"";
         public static readonly string pyVerifyScriptLocationNix = @"";
         public static readonly string pyTestScriptLocationWin = @"C:\Users\everettr\Desktop\testy.py";
-        public static readonly string pyTestScriptLocationNix = @"/home/ONEPURDUE/everettr/testy.py";
+        public static readonly string pyTestScriptLocationNix = @"/home/ONEPURDUE/everettr/risqueScripts/testy.py";
 
         public enum ScriptType {
             Python,

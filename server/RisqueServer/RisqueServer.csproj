@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="Communication\ComMessages.cs" />
     <Compile Include="Communication\Mailer.cs" />
+    <Compile Include="Communication\ServiceServer.cs" />
     <Compile Include="Security\SecurityManager.cs" />
     <Compile Include="Security\UserManager.cs" />
     <Compile Include="ConfigFile.cs" />
