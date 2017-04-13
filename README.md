@@ -2,5 +2,6 @@
 
 ## Compile instructions
 ```shell
-xbuild server/RisqueServer.sln
+xbuild RisqueServer.sln /p:WIN=false
 ```
+Set WIN=true if on Windows though you shouldn't use this on Windows.
