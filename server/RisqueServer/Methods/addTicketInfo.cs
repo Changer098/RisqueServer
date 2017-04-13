@@ -21,6 +21,10 @@ namespace RisqueServer.Methods {
             //Utilize TicketStorage.storeTicket
             try {
                 Ticket ticket = args.ToObject<Ticket>();
+                if (!ticket.isScheduled) {
+                    return new JObject(new JProperty("success", false), new JProperty("failureReason",
+                        "Ticket is not a Scheduled Ticket, cannot handle!"));
+                }
                 string failureReason;
                 if (storage.storeTicket(ticket, out failureReason)) {
                     return new JObject(new JProperty("success", true), new JProperty("failureReason", failureReason));
@@ -30,10 +34,10 @@ namespace RisqueServer.Methods {
                 }
             }
             catch (Exception e) {
-                string message = e.Message;
+                return new JObject(new JProperty("success", false), new JProperty("failureReason", String.Format("Server Exception: {0}", e.Message)));
             }
             
-            return null;
+            //return null;
         }
         public bool usesKeepAlive() {
             return false;
